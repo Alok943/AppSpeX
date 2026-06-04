@@ -18,6 +18,7 @@ function fakeRun(id: string, cost: number): JobStatusResponse {
       features: [],
       entities: [],
       integrations_requested: [],
+      businessRules: [],
       assumptions: [],
       clarification_required: false,
       clarification_question: null,

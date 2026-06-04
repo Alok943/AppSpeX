@@ -9,6 +9,8 @@ import type { RunsOverview } from "@/lib/runs";
 import {
   Card,
   StageProgress,
+  OverviewPanel,
+  PromptUnderstandingPanel,
   EntitiesPanel,
   PagesApisPanel,
   WorkflowsPanel,
@@ -153,6 +155,7 @@ export default function Home() {
     es.onerror = () => void finish();
   }, [prompt, running, setStage, loadOverview]);
 
+  const intent = status?.intent ?? null;
   const appSpec = status?.appSpec ?? null;
   const dataSchema = status?.dataSchema ?? null;
   const showOutput = status !== null;
@@ -209,6 +212,18 @@ export default function Home() {
             ) : null}
           </Card>
         )}
+
+        {showOutput && appSpec && dataSchema ? (
+          <Card title="App Overview">
+            <OverviewPanel appSpec={appSpec} dataSchema={dataSchema} repairLog={status.repairLog} />
+          </Card>
+        ) : null}
+
+        {showOutput && intent ? (
+          <Card title="Prompt Understanding">
+            <PromptUnderstandingPanel intent={intent} />
+          </Card>
+        ) : null}
 
         {showOutput && dataSchema ? (
           <Card title="Entities & Fields">

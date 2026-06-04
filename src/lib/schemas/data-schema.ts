@@ -70,6 +70,8 @@ const SNAKE_CASE = /^[a-z][a-z0-9_]*$/;
 export const EntitySchema = z.object({
   /** PascalCase domain noun, e.g. "Deal". */
   name: z.string().min(1),
+  /** Purpose of this entity, e.g. "Stores scheduled review events and recall results." */
+  description: z.string(),
   /** snake_case table name, e.g. "deals". */
   tableName: z.string().regex(SNAKE_CASE, "tableName must be snake_case"),
   fields: z.array(FieldSchema),

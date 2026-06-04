@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AppSpec, DataSchema } from "@/lib/schemas";
+import type { AppSpec, DataSchema, AppIntent } from "@/lib/schemas";
 import type { ValidationError } from "@/lib/validation";
 import type { Integration } from "@/lib/integrations";
 import type { JobStatusResponse, JobStatus } from "@/lib/jobs";
@@ -73,6 +73,66 @@ export function StageProgress({ stages }: { stages: StageView[] }) {
 
 // --- AppSpec output ---------------------------------------------------------
 
+export function OverviewPanel({ appSpec, dataSchema, repairLog }: { appSpec: AppSpec | null; dataSchema: DataSchema | null; repairLog: JobStatusResponse["repairLog"] }) {
+  if (!appSpec || !dataSchema) return null;
+  const totalRepairs = repairLog.reduce((n, s) => n + s.entries.length, 0);
+  return (
+    <div className="flex flex-wrap gap-8">
+      <Metric label="Entities" value={`${dataSchema.entities.length}`} />
+      <Metric label="Pages" value={`${appSpec.pages.length}`} />
+      <Metric label="APIs" value={`${appSpec.apiEndpoints.length}`} />
+      <Metric label="Integrations" value={`${appSpec.integrationHooks.length}`} />
+      <Metric label="Repairs" value={`${totalRepairs}`} />
+    </div>
+  );
+}
+
+export function PromptUnderstandingPanel({ intent }: { intent: AppIntent | null }) {
+  if (!intent) return <Empty label="No intent yet." />;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Detected Features</h3>
+        <ul className="list-inside list-disc text-sm text-slate-300 space-y-1">
+          {intent.features.map((f, i) => <li key={i}>{f}</li>)}
+        </ul>
+      </div>
+      <div>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Detected Entities</h3>
+        <ul className="list-inside list-disc text-sm text-slate-300 space-y-1">
+          {intent.entities.map((e, i) => <li key={i}>{e}</li>)}
+        </ul>
+      </div>
+      <div>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Detected Integrations</h3>
+        {intent.integrations_requested.length === 0 ? <p className="text-sm text-slate-500">None.</p> : (
+          <ul className="list-inside list-disc text-sm text-emerald-300 space-y-1">
+            {intent.integrations_requested.map((ing, i) => <li key={i}>{ing}</li>)}
+          </ul>
+        )}
+      </div>
+      {intent.businessRules && intent.businessRules.length > 0 && (
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Business Rules</h3>
+          <ul className="list-inside list-disc text-sm text-sky-300 space-y-1">
+            {intent.businessRules.map((rule, i) => <li key={i}>{rule}</li>)}
+          </ul>
+        </div>
+      )}
+      <div className="md:col-span-2">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Assumptions Made</h3>
+        {intent.assumptions.length === 0 ? <p className="text-sm text-slate-500">None made.</p> : (
+          <ul className="list-inside list-disc text-sm text-slate-400 space-y-1">
+            {intent.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// --- Entities ---------------------------------------------------------------
+
 export function EntitiesPanel({ dataSchema }: { dataSchema: DataSchema | null }) {
   if (!dataSchema) return <Empty label="No schema yet." />;
   return (
@@ -83,6 +143,9 @@ export function EntitiesPanel({ dataSchema }: { dataSchema: DataSchema | null })
             <h3 className="font-semibold text-slate-100">{e.name}</h3>
             <code className="text-xs text-indigo-300">{e.tableName}</code>
           </div>
+          {e.description ? (
+            <p className="mt-1 text-xs text-slate-400">{e.description}</p>
+          ) : null}
           <ul className="mt-3 flex flex-wrap gap-2">
             {e.fields.map((f) => (
               <li
@@ -175,7 +238,12 @@ export function WorkflowsPanel({ appSpec }: { appSpec: AppSpec | null }) {
         <div className="space-y-2">
           {appSpec.workflowStubs.map((w, i) => (
             <div key={i} className="rounded-xl border border-white/10 bg-black/20 p-3">
-              <div className="text-sm font-medium text-slate-100">{w.name}</div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-slate-100">{w.name}</div>
+                <div className={`text-[10px] font-semibold uppercase ${w.source === "synthesized" ? "text-amber-400" : "text-emerald-400"}`}>
+                  {w.source === "synthesized" ? "Synthesized Fallback" : "LLM Generated"}
+                </div>
+              </div>
               <div className="mt-1 text-xs text-slate-400">
                 on <span className="text-sky-300">{w.trigger.entity}</span>.{w.trigger.event}
                 {w.trigger.condition ? <span className="text-slate-500"> [{w.trigger.condition}]</span> : null} →{" "}
@@ -296,10 +364,10 @@ export function RegistryPanel({ integrations }: { integrations: Integration[] })
             <span className="text-sm font-medium text-slate-100">{i.displayName}</span>
             <span
               className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                i.implemented ? "bg-emerald-500/20 text-emerald-200" : "bg-slate-500/20 text-slate-300"
+                i.implemented ? "bg-sky-500/20 text-sky-300" : "bg-slate-500/20 text-slate-300"
               }`}
             >
-              {i.implemented ? "implemented" : "stub"}
+              {i.implemented ? "supported" : "stub"}
             </span>
           </div>
           <div className="mt-1 text-xs text-slate-400">

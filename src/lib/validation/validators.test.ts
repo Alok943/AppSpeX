@@ -23,12 +23,14 @@ const consistentSchema: DataSchema = {
   entities: [
     {
       name: "Deal",
+      description: "mock",
       tableName: "deals",
       fields: [tenantField],
       relations: [{ type: "belongsTo", target: "Agent", foreignKey: "agent_id", onDelete: "cascade" }],
     },
     {
       name: "Agent",
+      description: "mock",
       tableName: "agents",
       fields: [tenantField],
       relations: [{ type: "hasMany", target: "Deal", foreignKey: "agent_id", onDelete: "cascade" }],
@@ -55,7 +57,7 @@ describe("validateDataSchema", () => {
 
   it("flags an entity missing tenantId", () => {
     const bad: DataSchema = {
-      entities: [{ name: "Note", tableName: "notes", fields: [], relations: [] }],
+      entities: [{ name: "Note", description: "mock", tableName: "notes", fields: [], relations: [] }],
     };
     const { result } = validateDataSchema(bad);
     expect(codes(result.errors)).toContain("MISSING_TENANT_ID");
@@ -66,6 +68,7 @@ describe("validateDataSchema", () => {
       entities: [
         {
           name: "Deal",
+          description: "mock",
           tableName: "deals",
           fields: [tenantField],
           relations: [{ type: "belongsTo", target: "Ghost", foreignKey: "ghost_id", onDelete: "cascade" }],
@@ -81,12 +84,13 @@ describe("validateDataSchema", () => {
       entities: [
         {
           name: "Deal",
+          description: "mock",
           tableName: "deals",
           fields: [tenantField],
           relations: [{ type: "belongsTo", target: "Agent", foreignKey: "agent_id", onDelete: "cascade" }],
         },
         // Agent has NO inverse hasMany Deal.
-        { name: "Agent", tableName: "agents", fields: [tenantField], relations: [] },
+        { name: "Agent", description: "mock", tableName: "agents", fields: [tenantField], relations: [] },
       ],
     };
     const { result } = validateDataSchema(bad);

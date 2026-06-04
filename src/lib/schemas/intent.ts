@@ -36,6 +36,8 @@ export const AppIntentSchema = z.object({
   entities: z.array(z.string()),
   /** Third-party services mentioned, e.g. ["whatsapp", "slack"]. Drive workflow stubs. */
   integrations_requested: z.array(z.string()),
+  /** Extracted business rules, e.g. ["schedule reviews at +3/+7 days", "trigger when difficulty>=4"]. */
+  businessRules: z.array(z.string()),
   /** Decisions the system made when the prompt was underspecified. Always documented. */
   assumptions: z.array(z.string()),
 

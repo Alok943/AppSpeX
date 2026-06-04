@@ -24,6 +24,7 @@ export function buildIntentPrompt(rawPrompt: string, note?: string): Prompt {
     '  "features": string[],',
     '  "entities": string[],',
     '  "integrations_requested": string[],',
+    '  "businessRules": string[],',
     '  "assumptions": string[],',
     '  "clarification_required": boolean,',
     '  "clarification_question": string | null',
@@ -32,6 +33,7 @@ export function buildIntentPrompt(rawPrompt: string, note?: string): Prompt {
     "- appType MUST be one of the listed values.",
     "- entities are core domain nouns (PascalCase, singular), e.g. Lead, Deal, Property.",
     "- integrations_requested are lowercase ids of any third-party services mentioned, using these ids when applicable: slack, whatsapp, stripe, gmail, jira, google_sheets, salesforce, hubspot, notion, airtable, twilio_sms, github, zapier, webhook.",
+    "- Extract any specific business logic, schedules, or conditions (e.g. 'schedule reviews at +3/+7 days', 'trigger when deal closes') into businessRules[].",
     "- CLARIFICATION POLICY: if you cannot confidently determine BOTH the appType AND at least one entity, set clarification_required=true and put exactly ONE specific question in clarification_question (still fill the other fields with best-effort guesses).",
     "- Otherwise set clarification_required=false and clarification_question=null, and record every assumption you made (overscoped prompts: reduce to an MVP and list the cuts; conflicting domains: pick one primary domain and state the decision; vague modifiers like 'smart': define what you assumed) in assumptions[].",
   ].join("\n");
@@ -48,6 +50,7 @@ export function buildSchemaPrompt(intent: AppIntent, note?: string): Prompt {
     '{ "entities": EntitySchema[] }',
     "EntitySchema = {",
     '  "name": string (PascalCase),',
+    '  "description": string (Purpose of this entity),',
     '  "tableName": string (snake_case, plural),',
     '  "fields": Field[],',
     '  "relations": Relation[]',
@@ -80,6 +83,7 @@ export function registrySummary(registry: IntegrationRegistry, ids: string[]): s
 export function buildAppSpecPrompt(
   dataSchema: DataSchema,
   integrationsRequested: string[],
+  businessRules: string[],
   registry: IntegrationRegistry,
   note?: string,
 ): Prompt {
@@ -98,11 +102,14 @@ export function buildAppSpecPrompt(
     "- Every page MUST have at least one apiEndpoint bound to the same entity.",
     "- integrationHooks and workflowStubs MUST reference ONLY these registered integrations and their listed action ids:",
     registrySummary(registry, integrationsRequested),
+    "- Explicitly model transactional entities when mentioned.",
+    "- Explicitly generate dashboard/analytics surfaces when requested.",
+    "- Use the provided business rules to derive workflow triggers and conditions (e.g., 'trigger on X when Y').",
     "- Create at least one workflowStub for each of these requested integrations: " + (integrationsRequested.join(", ") || "(none)"),
     "- workflowStub.payload maps entity fields (source, e.g. \"Deal.client_phone\") to action input fields (target, e.g. \"to\").",
     "- Define sensible roles (e.g. admin, plus a domain role) and a permission matrix.",
   ].join("\n");
 
-  const user = `DataSchema:\n${JSON.stringify(dataSchema, null, 2)}\n\nRequested integrations: ${JSON.stringify(integrationsRequested)}${correctionBlock(note)}`;
+  const user = `DataSchema:\n${JSON.stringify(dataSchema, null, 2)}\n\nBusiness rules:\n${JSON.stringify(businessRules, null, 2)}\n\nRequested integrations: ${JSON.stringify(integrationsRequested)}${correctionBlock(note)}`;
   return { system, user };
 }

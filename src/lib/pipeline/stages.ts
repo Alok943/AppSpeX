@@ -38,13 +38,14 @@ export function runSchemaStage(intent: AppIntent, gateway: LlmGateway): Promise<
 export function runAppSpecStage(
   dataSchema: DataSchema,
   integrationsRequested: string[],
+  businessRules: string[],
   gateway: LlmGateway,
 ): Promise<StageOutcome<AppSpec>> {
   return runStage({
     stage: "appspec",
     schema: AppSpecSchema,
     gateway,
-    buildPrompt: (note) => buildAppSpecPrompt(dataSchema, integrationsRequested, integrationRegistry, note),
+    buildPrompt: (note) => buildAppSpecPrompt(dataSchema, integrationsRequested, businessRules, integrationRegistry, note),
     semanticErrors: (data) => validateAppSpec(data, dataSchema, integrationRegistry).result.errors,
     consistencyRepair: (data) => repairAppSpecConsistency(data, dataSchema, integrationRegistry),
   });

@@ -139,7 +139,7 @@ export async function runPipeline(prompt: string, opts: RunPipelineOptions = {})
 
   // --- Stage 3: AppSpec ---
   emit({ type: "stage_start", stage: "appspec", timestamp: now() });
-  const specOut = await runAppSpecStage(schemaOut.data, intentOut.data.integrations_requested, gateway);
+  const specOut = await runAppSpecStage(schemaOut.data, intentOut.data.integrations_requested, intentOut.data.businessRules, gateway);
   if (!specOut.ok || !specOut.data) {
     stages.push(reportOf(specOut));
     emit({ type: "stage_failed", stage: "appspec", timestamp: now(), errors: specOut.errors, repairLog: specOut.repairLog });
@@ -150,6 +150,7 @@ export async function runPipeline(prompt: string, opts: RunPipelineOptions = {})
   const coverage = ensureWorkflowCoverage(
     specOut.data,
     intentOut.data.integrations_requested,
+    intentOut.data.businessRules,
     schemaOut.data,
     integrationRegistry,
   );

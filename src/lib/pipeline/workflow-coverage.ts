@@ -15,6 +15,7 @@ export function normalizeIntegrationId(raw: string): string {
 export function ensureWorkflowCoverage(
   appSpec: AppSpec,
   integrationsRequested: string[],
+  businessRules: string[],
   dataSchema: DataSchema,
   registry: IntegrationRegistry,
 ): { appSpec: AppSpec; log: RepairLogEntry[] } {
@@ -31,14 +32,20 @@ export function ensureWorkflowCoverage(
     const action = integration.actions[0];
     if (!action || !firstEntity) continue;
 
+    // Rule-Aware Fallback: Look for a business rule mentioning this integration
+    const matchedRule = businessRules.find(r => r.toLowerCase().includes(id) || r.toLowerCase().includes(integration.displayName.toLowerCase()));
+    const condition = matchedRule ? `Derived from rule: ${matchedRule}` : null;
+    const name = matchedRule ? `${integration.displayName} (${matchedRule})` : `${integration.displayName} on ${firstEntity.name} change`;
+
     const stub: WorkflowStub = {
-      name: `${integration.displayName} on ${firstEntity.name} change`,
-      trigger: { entity: firstEntity.name, event: "status_changed", condition: null },
+      name,
+      trigger: { entity: firstEntity.name, event: "status_changed", condition },
       integration: id,
       action: action.id,
       payload: action.input
         .filter((f) => f.required)
         .map((f) => ({ source: `${firstEntity.name}.id`, target: f.name })),
+      source: "synthesized",
     };
     stubs.push(stub);
     covered.add(id);

@@ -14,12 +14,14 @@ describe("repairDataSchemaConsistency", () => {
       entities: [
         {
           name: "Deal",
+          description: "mock",
           tableName: "deals",
           fields: [], // missing tenantId
           relations: [{ type: "belongsTo", target: "Agent", foreignKey: "agent_id", onDelete: "cascade" }],
         },
         {
           name: "Agent",
+          description: "mock",
           tableName: "agents",
           fields: [], // missing tenantId
           relations: [], // missing inverse hasMany Deal
@@ -39,6 +41,7 @@ describe("repairDataSchemaConsistency", () => {
       entities: [
         {
           name: "Deal",
+          description: "mock",
           tableName: "deals",
           fields: [
             { name: "tenantId", type: "uuid", nullable: false, isRelation: false, isPrimary: false, isUnique: false },
@@ -56,7 +59,7 @@ describe("repairDataSchemaConsistency", () => {
 describe("repairAppSpecConsistency", () => {
   const dataSchema: DataSchema = {
     entities: [
-      { name: "Deal", tableName: "deals", fields: [{ name: "tenantId", type: "uuid", nullable: false, isRelation: false, isPrimary: false, isUnique: false }], relations: [] },
+      { name: "Deal", description: "mock", tableName: "deals", fields: [{ name: "tenantId", type: "uuid", nullable: false, isRelation: false, isPrimary: false, isUnique: false }], relations: [] },
     ],
   };
 

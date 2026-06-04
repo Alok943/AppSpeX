@@ -89,6 +89,7 @@ export const WorkflowStubSchema = z.object({
   integration: z.string().min(1),
   action: z.string().min(1),
   payload: z.array(PayloadMappingSchema),
+  source: z.enum(["llm", "synthesized"]).optional(),
 });
 export type WorkflowStub = z.infer<typeof WorkflowStubSchema>;
 
