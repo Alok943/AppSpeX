@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobStatusResponse } from "@/lib/jobs";
 import type { Integration } from "@/lib/integrations";
@@ -160,8 +161,8 @@ export default function Home() {
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <header className="mb-8">
         <div className="flex items-center gap-[12px]">
-          <img src="/logo.png" alt="AppSpeX Logo" className="h-7 w-7 object-contain" />
-          <h1 className="text-[32px] font-bold leading-none text-white tracking-[-0.04em]" style={{ fontFamily: '"Satoshi", var(--font-geist-sans), sans-serif' }}>AppSpeX</h1>
+          <Image src="/logo.png" alt="AppSpeX Logo" width={28} height={28} className="object-contain" priority />
+          <h1 className="text-[32px] font-bold leading-none text-white">AppSpeX</h1>
         </div>
         <p className="mt-2 text-sm text-slate-400">
           Describe an app in plain English → a validated, machine-readable AppSpec.

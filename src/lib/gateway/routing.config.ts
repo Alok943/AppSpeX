@@ -11,7 +11,7 @@ export interface RouteConfig {
  * models — stage code never names a model. Edit here to re-route.
  *
  *  - intent  -> cheapest fast model (Groq Llama 3.1 8B)
- *  - schema  -> cheap reasoning model (Groq gpt-oss-20b)
+ *  - schema  -> most capable cheap model (Groq gpt-oss-120b)
  *  - appspec -> most capable cheap model (Groq gpt-oss-120b; hardest stage)
  *  - repair  -> fast model for narrow field re-prompts (Groq Llama 3.1 8B)
  *
@@ -22,7 +22,7 @@ export interface RouteConfig {
  */
 export const ROUTING: Record<StageName, RouteConfig> = {
   intent: { primary: "groq-llama-8b", fallback: "gemini-flash" },
-  schema: { primary: "groq-gpt-oss-20b", fallback: "gemini-flash" },
+  schema: { primary: "groq-gpt-oss-120b", fallback: "gemini-flash" },
   appspec: { primary: "groq-gpt-oss-120b", fallback: "gemini-flash" },
   repair: { primary: "groq-llama-8b", fallback: "gemini-flash" },
 };
