@@ -3,6 +3,9 @@
 # persisted run history (local cost tracking)
 /.data
 
+# logs / scratch artifacts
+*.log
+
 # dependencies
 /node_modules
 /.pnp
