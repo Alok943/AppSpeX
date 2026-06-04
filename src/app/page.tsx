@@ -6,6 +6,7 @@ import type { JobStatusResponse } from "@/lib/jobs";
 import type { Integration } from "@/lib/integrations";
 import type { PipelineEvent } from "@/lib/pipeline";
 import type { RunsOverview } from "@/lib/runs";
+import { downloadJSON, downloadPDF } from "@/lib/export";
 import {
   Card,
   StageProgress,
@@ -217,6 +218,20 @@ export default function Home() {
         {showOutput && appSpec && dataSchema ? (
           <Card title="App Overview">
             <OverviewPanel appSpec={appSpec} dataSchema={dataSchema} repairLog={status.repairLog} />
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => downloadJSON(status)}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+              >
+                ↓ Download JSON
+              </button>
+              <button
+                onClick={() => downloadPDF(status)}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-white/10"
+              >
+                ↓ Download PDF
+              </button>
+            </div>
           </Card>
         ) : null}
 
