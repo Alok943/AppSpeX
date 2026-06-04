@@ -14,7 +14,7 @@ Built for the OneAtlas AI Engineer 3-day trial.
 
 ## Quick start (< 5 minutes)
 
-**Prerequisites:** Node.js ≥ 18.17 (developed on 22).
+**Prerequisites:** Node.js ≥ 20.9 (developed on 22) — required by Next 16.
 
 ```bash
 # 1. install
