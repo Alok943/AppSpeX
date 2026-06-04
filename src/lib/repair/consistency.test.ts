@@ -54,6 +54,30 @@ describe("repairDataSchemaConsistency", () => {
     expect(validateDataSchema(data).result.valid).toBe(true);
     expect(log.some((l) => l.detail.includes("dropped dangling"))).toBe(true);
   });
+
+  it("does NOT add a duplicate tenantId when tenant_id already exists", () => {
+    const schema: DataSchema = {
+      entities: [
+        {
+          name: "Lead",
+          description: "mock",
+          tableName: "leads",
+          fields: [
+            { name: "id", type: "uuid", nullable: false, isRelation: false, isPrimary: true, isUnique: true },
+            { name: "tenant_id", type: "uuid", nullable: false, isRelation: false, isPrimary: false, isUnique: false },
+          ],
+          relations: [],
+        },
+      ],
+    };
+    const { data, log } = repairDataSchemaConsistency(schema);
+    const tenantFields = data.entities[0]!.fields.filter(
+      (f) => f.name.replace(/[_-]/g, "").toLowerCase() === "tenantid",
+    );
+    expect(tenantFields).toHaveLength(1);
+    expect(tenantFields[0]!.name).toBe("tenant_id"); // preserved original
+    expect(log.some((l) => l.detail.includes("added tenantId"))).toBe(false);
+  });
 });
 
 describe("repairAppSpecConsistency", () => {

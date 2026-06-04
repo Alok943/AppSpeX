@@ -57,8 +57,9 @@ export function repairDataSchemaConsistency(input: DataSchema): RepairResult<Dat
   const entityNames = new Set(entities.map((e) => e.name));
 
   for (const e of entities) {
-    // Add a missing tenantId.
-    if (!e.fields.some((f) => f.name === "tenantId")) {
+    // Add a missing tenantId — normalize so tenant_id / tenantId / tenantID are equivalent.
+    const hasTenant = e.fields.some((f) => f.name.replace(/[_-]/g, "").toLowerCase() === "tenantid");
+    if (!hasTenant) {
       e.fields.push(tenantField());
       log.push({
         strategy: "consistency",

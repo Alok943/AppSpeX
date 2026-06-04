@@ -3,6 +3,7 @@ import { DataSchema, EntitySchema } from "@/lib/schemas/data-schema";
 
 const validEntity = {
   name: "Deal",
+  description: "Represents a real estate transaction",
   tableName: "deals",
   fields: [
     {

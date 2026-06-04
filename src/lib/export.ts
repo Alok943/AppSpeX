@@ -1,7 +1,10 @@
 import type { JobStatusResponse } from "@/lib/jobs";
+import type { AppIntent, DataSchema, AppSpec } from "@/lib/schemas";
 import { jsPDF } from "jspdf";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
+
+const REPORT_VERSION = "v0.4";
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -23,13 +26,148 @@ function sanitiseFilename(prompt: string): string {
     .toLowerCase();
 }
 
+// ── Coverage computation (shared between UI & export) ────────────────────────
+
+const HEALTHY_REPAIRS = [
+  "added tenantId",
+  "added inverse",
+  "missing array",
+  "filled typed default",
+];
+
+const CONCERNING_REPAIRS = [
+  "synthesized",
+  "dropped",
+  "removed",
+  "generated fallback",
+];
+
+interface CoverageItem {
+  name: string;
+  covered: boolean;
+}
+
+interface CoverageSummary {
+  entities: CoverageItem[];
+  integrations: CoverageItem[];
+  businessRules: CoverageItem[];
+  features: CoverageItem[];
+  overallPercent: number;
+}
+
+function computeCoverage(
+  intent: AppIntent,
+  appSpec: AppSpec,
+  dataSchema: DataSchema,
+): CoverageSummary {
+  const schemaEntityNames = new Set(dataSchema.entities.map((e) => e.name.toLowerCase()));
+  const entities = intent.entities.map((e) => ({
+    name: e,
+    covered: schemaEntityNames.has(e.toLowerCase()),
+  }));
+
+  const allHooks = new Set([
+    ...appSpec.integrationHooks.map((h) => h.integration),
+    ...appSpec.workflowStubs.map((w) => w.integration),
+  ]);
+  const integrations = intent.integrations_requested.map((i) => ({
+    name: i,
+    covered: allHooks.has(i),
+  }));
+
+  const workflowText = appSpec.workflowStubs
+    .map((w) => `${w.trigger.condition || ""} ${w.name}`)
+    .join(" ")
+    .toLowerCase();
+  const businessRules = (intent.businessRules || []).map((r) => ({
+    name: r,
+    covered:
+      workflowText.includes(r.toLowerCase()) ||
+      r
+        .toLowerCase()
+        .split(/\s+/)
+        .some((word) => word.length > 4 && workflowText.includes(word)),
+  }));
+
+  const appSpecText = [
+    ...appSpec.pages.map((p) => p.name),
+    ...dataSchema.entities.map((e) => e.name),
+    ...dataSchema.entities.flatMap((e) => e.fields.map((f) => f.name)),
+    ...appSpec.workflowStubs.map((w) => w.name),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const features = intent.features.map((f) => {
+    const fLower = f.toLowerCase();
+    const isCovered =
+      appSpecText.includes(fLower) ||
+      fLower.split(/\s+/).some((word) => word.length > 4 && appSpecText.includes(word));
+    return { name: f, covered: isCovered };
+  });
+
+  const totalItems =
+    entities.length + integrations.length + businessRules.length + features.length;
+  const coveredItems =
+    entities.filter((x) => x.covered).length +
+    integrations.filter((x) => x.covered).length +
+    businessRules.filter((x) => x.covered).length +
+    features.filter((x) => x.covered).length;
+  const overallPercent = totalItems > 0 ? Math.round((coveredItems / totalItems) * 100) : 100;
+
+  return { entities, integrations, businessRules, features, overallPercent };
+}
+
+interface HealthSummary {
+  healthy: string[];
+  concerning: string[];
+  other: string[];
+}
+
+function computeHealth(status: JobStatusResponse): HealthSummary {
+  const allEntries = status.repairLog.flatMap((s) => s.entries);
+  const healthy = allEntries
+    .filter((e) => HEALTHY_REPAIRS.some((k) => e.detail.includes(k)))
+    .map((e) => e.detail);
+  const concerning = allEntries
+    .filter((e) => CONCERNING_REPAIRS.some((k) => e.detail.includes(k)))
+    .map((e) => e.detail);
+  const healthySet = new Set(healthy);
+  const concerningSet = new Set(concerning);
+  const other = allEntries
+    .filter((e) => !healthySet.has(e.detail) && !concerningSet.has(e.detail))
+    .map((e) => e.detail);
+  return { healthy, concerning, other };
+}
+
 // ── JSON ─────────────────────────────────────────────────────────────────────
 
 export function downloadJSON(status: JobStatusResponse) {
+  const coverage =
+    status.intent && status.appSpec && status.dataSchema
+      ? computeCoverage(status.intent, status.appSpec, status.dataSchema)
+      : null;
+  const health = computeHealth(status);
+
   const payload = {
+    reportVersion: REPORT_VERSION,
     exportedAt: new Date().toISOString(),
     prompt: status.prompt,
     appType: status.intent?.appType ?? null,
+    coverageSummary: coverage
+      ? {
+          entities: `${coverage.entities.filter((x) => x.covered).length}/${coverage.entities.length}`,
+          features: `${coverage.features.filter((x) => x.covered).length}/${coverage.features.length}`,
+          integrations: `${coverage.integrations.filter((x) => x.covered).length}/${coverage.integrations.length}`,
+          businessRules: `${coverage.businessRules.filter((x) => x.covered).length}/${coverage.businessRules.length}`,
+          overallCoverage: `${coverage.overallPercent}%`,
+        }
+      : null,
+    generationHealth: {
+      healthyRepairs: health.healthy,
+      concerningRepairs: health.concerning,
+      otherRepairs: health.other,
+    },
     intent: status.intent,
     dataSchema: status.dataSchema,
     appSpec: status.appSpec,
@@ -117,6 +255,17 @@ function keyValue(doc: jsPDF, y: number, pairs: [string, string][]): number {
   return y;
 }
 
+function coverageList(doc: jsPDF, y: number, label: string, items: CoverageItem[]): number {
+  if (items.length === 0) return y;
+  y = body(doc, y, `${label}:`);
+  y = bullet(
+    doc,
+    y,
+    items.map((x) => `${x.covered ? "[OK]" : "[MISSING]"} ${x.name}`),
+  );
+  return y;
+}
+
 export function downloadPDF(status: JobStatusResponse) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
@@ -124,25 +273,63 @@ export function downloadPDF(status: JobStatusResponse) {
   // ── Title ──
   doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text("AppSpeX Output Report", MARGIN, y);
-  y += 10;
-  doc.setFontSize(9);
+  doc.text("AppSpeX Report", MARGIN, y);
+  y += 8;
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(120);
+  doc.setTextColor(100);
+  doc.text(REPORT_VERSION, MARGIN + doc.getTextWidth("AppSpeX Report ") + 2, MARGIN);
+  doc.setFontSize(9);
   doc.text(`Generated: ${new Date().toLocaleString()}`, MARGIN, y);
   y += LINE_H;
   doc.text(`Job ID: ${status.jobId}`, MARGIN, y);
+  y += LINE_H;
+  doc.text(`Pipeline Version: ${REPORT_VERSION}`, MARGIN, y);
   y += 8;
   doc.setTextColor(0);
 
-  // ── Prompt ──
-  y = heading(doc, y, "1. Prompt");
+  // ── 1. Coverage Summary (first thing reviewers see) ──
+  const coverage =
+    status.intent && status.appSpec && status.dataSchema
+      ? computeCoverage(status.intent, status.appSpec, status.dataSchema)
+      : null;
+
+  if (coverage) {
+    y = heading(doc, y, "1. Coverage Summary");
+    y = keyValue(doc, y, [
+      ["Overall Coverage", `${coverage.overallPercent}%`],
+      [
+        "Entities",
+        `${coverage.entities.filter((x) => x.covered).length}/${coverage.entities.length}`,
+      ],
+      [
+        "Features",
+        `${coverage.features.filter((x) => x.covered).length}/${coverage.features.length}`,
+      ],
+      [
+        "Integrations",
+        `${coverage.integrations.filter((x) => x.covered).length}/${coverage.integrations.length}`,
+      ],
+    ]);
+    if (coverage.businessRules.length > 0) {
+      y = keyValue(doc, y, [
+        [
+          "Business Rules",
+          `${coverage.businessRules.filter((x) => x.covered).length}/${coverage.businessRules.length}`,
+        ],
+      ]);
+    }
+    y += 4;
+  }
+
+  // ── 2. Prompt ──
+  y = heading(doc, y, "2. Prompt");
   y = body(doc, y, status.prompt);
   y += 4;
 
-  // ── Intent ──
+  // ── 3. Intent ──
   if (status.intent) {
-    y = heading(doc, y, "2. Intent Extraction");
+    y = heading(doc, y, "3. Intent Extraction");
     y = keyValue(doc, y, [
       ["App Name", status.intent.appName],
       ["App Type", status.intent.appType],
@@ -176,9 +363,9 @@ export function downloadPDF(status: JobStatusResponse) {
     }
   }
 
-  // ── Data Schema ──
+  // ── 4. Data Schema ──
   if (status.dataSchema) {
-    y = heading(doc, y, "3. Data Schema");
+    y = heading(doc, y, "4. Data Schema");
     for (const entity of status.dataSchema.entities) {
       y = heading(doc, y, entity.name, 3);
       if (entity.description) {
@@ -187,16 +374,16 @@ export function downloadPDF(status: JobStatusResponse) {
       }
       y = keyValue(doc, y, [["Table", entity.tableName]]);
 
-      // Fields as a compact list
       const fieldLines = entity.fields.map(
         (f) =>
           `${f.name} (${f.type})${f.isPrimary ? " [PK]" : ""}${f.isUnique ? " [UNIQUE]" : ""}${f.nullable ? " nullable" : ""}`,
       );
       y = bullet(doc, y, fieldLines);
 
-      // Relations
       if (entity.relations.length > 0) {
-        const relLines = entity.relations.map((r) => `${r.type} → ${r.target} (${r.foreignKey})`);
+        const relLines = entity.relations.map(
+          (r) => `${r.type} → ${r.target} (${r.foreignKey})`,
+        );
         y = body(doc, y, "Relations:");
         y = bullet(doc, y, relLines);
       }
@@ -204,18 +391,20 @@ export function downloadPDF(status: JobStatusResponse) {
     }
   }
 
-  // ── AppSpec ──
+  // ── 5. AppSpec ──
   if (status.appSpec) {
-    y = heading(doc, y, "4. Application Specification");
+    y = heading(doc, y, "5. Application Specification");
 
-    // Pages
     y = heading(doc, y, "Pages", 3);
     for (const p of status.appSpec.pages) {
-      y = body(doc, y, `${p.name} — ${p.route} [${p.layout}] entity: ${p.entity}, components: ${p.components.join(", ")}`);
+      y = body(
+        doc,
+        y,
+        `${p.name} — ${p.route} [${p.layout}] entity: ${p.entity}, components: ${p.components.join(", ")}`,
+      );
     }
     y += 2;
 
-    // API Endpoints (grouped by entity)
     y = heading(doc, y, "API Endpoints", 3);
     const byEntity = new Map<string, typeof status.appSpec.apiEndpoints>();
     for (const ep of status.appSpec.apiEndpoints) {
@@ -233,15 +422,19 @@ export function downloadPDF(status: JobStatusResponse) {
     }
     y += 2;
 
-    // Auth
     y = heading(doc, y, "Auth Rules", 3);
-    y = keyValue(doc, y, [["Roles", status.appSpec.authRules.roles.join(", ")]]);
+    y = keyValue(doc, y, [
+      ["Roles", status.appSpec.authRules.roles.join(", ")],
+    ]);
     for (const perm of status.appSpec.authRules.permissions) {
-      y = body(doc, y, `${perm.role} → ${perm.entity}: ${perm.actions.join(", ")}`);
+      y = body(
+        doc,
+        y,
+        `${perm.role} → ${perm.entity}: ${perm.actions.join(", ")}`,
+      );
     }
     y += 2;
 
-    // Workflows
     if (status.appSpec.workflowStubs.length > 0) {
       y = heading(doc, y, "Workflow Stubs", 3);
       for (const w of status.appSpec.workflowStubs) {
@@ -256,42 +449,81 @@ export function downloadPDF(status: JobStatusResponse) {
     }
   }
 
-  // ── Repairs ──
-  const totalRepairs = status.repairLog.reduce((n, s) => n + s.entries.length, 0);
-  if (totalRepairs > 0) {
-    y = heading(doc, y, "5. Repair Log");
-    for (const stage of status.repairLog) {
-      if (stage.entries.length === 0) continue;
-      y = heading(doc, y, stage.stage, 3);
+  // ── 6. Requirement Coverage (detailed) ──
+  if (coverage) {
+    y = heading(doc, y, "6. Requirement Coverage");
+    y = coverageList(doc, y, "Entities", coverage.entities);
+    y = coverageList(doc, y, "Features", coverage.features);
+    y = coverageList(doc, y, "Integrations", coverage.integrations);
+    y = coverageList(doc, y, "Business Rules", coverage.businessRules);
+    y += 2;
+  }
+
+  // ── 7. Generation Health ──
+  const health = computeHealth(status);
+  const hasHealth = health.healthy.length > 0 || health.concerning.length > 0 || health.other.length > 0;
+  if (hasHealth || status.errors.length > 0) {
+    y = heading(doc, y, "7. Generation Health");
+
+    if (status.errors.length > 0) {
+      y = body(doc, y, "Unresolved Errors:");
       y = bullet(
         doc,
         y,
-        stage.entries.map((e) => `[${e.outcome}] ${e.detail}`),
+        status.errors.map((e) => `${e.code} at ${e.path}: ${e.message}`),
       );
+      y += 2;
+    }
+
+    if (health.healthy.length > 0) {
+      y = body(doc, y, `Healthy Repairs (${health.healthy.length}):`);
+      y = bullet(
+        doc,
+        y,
+        health.healthy.map((d) => `[OK] ${d}`),
+      );
+      y += 1;
+    }
+
+    if (health.concerning.length > 0) {
+      y = body(doc, y, `Concerning Repairs (${health.concerning.length}):`);
+      y = bullet(
+        doc,
+        y,
+        health.concerning.map((d) => `[WARN] ${d}`),
+      );
+      y += 1;
+    }
+
+    if (health.other.length > 0) {
+      y = body(doc, y, `Other Repairs (${health.other.length}):`);
+      y = bullet(doc, y, health.other);
+      y += 1;
+    }
+
+    if (!hasHealth && status.errors.length === 0) {
+      y = body(doc, y, "Perfect generation — no repairs or errors.");
     }
     y += 2;
-  }
-
-  // ── Errors ──
-  if (status.errors.length > 0) {
-    y = heading(doc, y, "6. Unresolved Errors");
-    y = bullet(
-      doc,
-      y,
-      status.errors.map((e) => `${e.code} at ${e.path}: ${e.message}`),
-    );
+  } else {
+    y = heading(doc, y, "7. Generation Health");
+    y = body(doc, y, "Perfect generation — no repairs or errors.");
     y += 2;
   }
 
-  // ── Cost ──
-  y = heading(doc, y, totalRepairs > 0 || status.errors.length > 0 ? "7. Cost & Latency" : "5. Cost & Latency");
+  // ── 8. Cost & Latency ──
+  y = heading(doc, y, "8. Cost & Latency");
   y = keyValue(doc, y, [
     ["Total Cost", `$${status.cost.totalUsd.toFixed(6)}`],
     ["Total Latency", `${status.cost.totalLatencyMs} ms`],
   ]);
   y += 2;
   for (const s of status.cost.perStage) {
-    y = body(doc, y, `${s.stage}: ${s.model} — ${s.calls} call(s), ${s.tokensIn}→${s.tokensOut} tokens, $${s.costUsd.toFixed(6)}, ${s.latencyMs}ms`);
+    y = body(
+      doc,
+      y,
+      `${s.stage}: ${s.model} — ${s.calls} call(s), ${s.tokensIn}→${s.tokensOut} tokens, $${s.costUsd.toFixed(6)}, ${s.latencyMs}ms`,
+    );
   }
 
   // ── Footer on every page ──
@@ -300,7 +532,11 @@ export function downloadPDF(status: JobStatusResponse) {
     doc.setPage(i);
     doc.setFontSize(7);
     doc.setTextColor(160);
-    doc.text(`AppSpeX Report — Page ${i}/${pages}`, MARGIN, 292);
+    doc.text(
+      `AppSpeX Report ${REPORT_VERSION} — Page ${i}/${pages}`,
+      MARGIN,
+      292,
+    );
     doc.setTextColor(0);
   }
 

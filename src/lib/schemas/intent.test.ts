@@ -9,6 +9,7 @@ describe("AppIntentSchema", () => {
       features: ["manage leads", "view analytics"],
       entities: ["Lead", "Property", "Deal"],
       integrations_requested: ["whatsapp"],
+      businessRules: ["trigger notifications when a deal closes"],
       assumptions: [],
       clarification_required: false,
       clarification_question: null,
