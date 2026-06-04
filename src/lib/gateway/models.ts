@@ -92,7 +92,7 @@ export const COST_TABLE: Record<string, CostRate> = {
   "llama-3.3-70b-versatile": { inputPer1M: 0.59, outputPer1M: 0.79 },
   // Gemini — free tier for this key.
   "gemini-2.5-flash": { inputPer1M: 0, outputPer1M: 0 },
-  "gemini-3.1-flash-lite": { inputPer1M: 0, outputPer1M: 0 },
+  "gemini-3.1-flash-lite": { inputPer1M: 0.25, outputPer1M: 1.50 },
   // OpenRouter ":free" variants.
   "nvidia/nemotron-nano-9b-v2:free": { inputPer1M: 0, outputPer1M: 0 },
   "nvidia/nemotron-3-super-120b-a12b:free": { inputPer1M: 0, outputPer1M: 0 },
