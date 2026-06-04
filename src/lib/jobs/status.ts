@@ -3,6 +3,7 @@ import type { AppIntent, DataSchema, AppSpec } from "@/lib/schemas";
 import type { ValidationError } from "@/lib/validation";
 import type { RepairLogEntry } from "@/lib/repair";
 import type { StageName } from "@/lib/gateway";
+import { computeCoverage, type CoverageSummary } from "@/lib/coverage";
 
 export interface StageCost {
   stage: StageName;
@@ -31,6 +32,8 @@ export interface JobStatusResponse {
     perStage: StageCost[];
     perProvider: Record<string, number>;
   };
+  /** Requirement coverage (ok/partial/missing per requirement). Null until the run completes. */
+  coverage: CoverageSummary | null;
 }
 
 /** Shape a job into the public status response. */
@@ -56,6 +59,12 @@ export function toStatusResponse(job: Job): JobStatusResponse {
   // Errors come from whichever stage failed.
   const errors = stages.flatMap((s) => s.errors);
 
+  // Requirement coverage — only computable once all three artifacts exist.
+  const coverage =
+    result?.intent && result.appSpec && result.dataSchema
+      ? computeCoverage(result.intent, result.appSpec, result.dataSchema)
+      : null;
+
   return {
     jobId: job.id,
     status: job.status,
@@ -76,5 +85,6 @@ export function toStatusResponse(job: Job): JobStatusResponse {
       perStage,
       perProvider,
     },
+    coverage,
   };
 }

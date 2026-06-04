@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { Gateway, GatewayError, ROUTING } from "@/lib/gateway";
+import { Gateway, GatewayError } from "@/lib/gateway";
+import type { RouteConfig, StageName } from "@/lib/gateway";
 
 function openAISuccess(content: string, pin = 10, pout = 20): Response {
   return new Response(
@@ -26,6 +27,15 @@ const errorResp = (status: number): Response => new Response("error", { status }
 const req = { system: "s", user: "u" };
 const keysAlways = () => "test-key";
 
+// Fixed routing so these tests assert gateway *mechanics* independent of the
+// production routing.config.ts (which changes as models are re-routed).
+const TEST_ROUTING: Record<StageName, RouteConfig> = {
+  intent: { primary: "groq-llama-8b", fallback: "gemini-flash" },
+  schema: { primary: "groq-llama-8b", fallback: "gemini-flash" },
+  appspec: { primary: "groq-llama-8b", fallback: "gemini-flash" },
+  repair: { primary: "groq-llama-8b", fallback: "gemini-flash" },
+};
+
 function makeGateway(
   fetchMock: (url: string) => Promise<Response>,
   getApiKey: (p: string) => string | undefined = keysAlways,
@@ -34,7 +44,7 @@ function makeGateway(
     getApiKey: getApiKey as () => string | undefined,
     fetchImpl: ((url: string | URL | Request) =>
       fetchMock(String(url))) as unknown as typeof fetch,
-    routing: ROUTING,
+    routing: TEST_ROUTING,
   });
 }
 
@@ -44,7 +54,7 @@ describe("Gateway", () => {
     const r = await gw.generate("intent", req);
 
     expect(r.text).toBe("hello");
-    expect(r.provider).toBe("gemini");
+    expect(r.provider).toBe("groq");
     expect(r.viaFallback).toBe(false);
     expect(r.tokensIn).toBe(10);
     expect(r.tokensOut).toBe(20);

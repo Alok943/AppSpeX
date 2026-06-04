@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-06-04T09:41:03.253Z",
+  "runAt": "2026-06-04T10:21:19.772Z",
   "baseUrl": "http://localhost:3000",
   "aggregate": {
     "total": 12,
@@ -8,10 +8,10 @@
     "failures": 0,
     "successRate": "92%",
     "clarificationRate": "8%",
-    "totalCostUsd": 0,
-    "avgCostUsd": 0,
-    "totalLatencyMs": 111352,
-    "avgLatencyMs": 9279,
+    "totalCostUsd": 0.03128,
+    "avgCostUsd": 0.002607,
+    "totalLatencyMs": 80621,
+    "avgLatencyMs": 6718,
     "totalRepairEntries": 0,
     "totalRetries": 0,
     "weakestStage": "none"
@@ -27,42 +27,92 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 12536,
-      "estimatedCostUsd": 0,
+      "latencyMs": 9288,
+      "estimatedCostUsd": 0.0030467099999999998,
       "integrationsDetected": [
         "whatsapp"
       ],
       "integrationsInSpec": [
         "whatsapp"
       ],
-      "entityCount": 5,
-      "pageCount": 4,
-      "endpointCount": 4,
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 2932,
-          "costUsd": 0,
+          "latencyMs": 1774,
+          "costUsd": 0.000034960000000000004,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 5602,
-          "costUsd": 0,
+          "latencyMs": 3543,
+          "costUsd": 0.00162975,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2777,
-          "costUsd": 0,
+          "latencyMs": 2167,
+          "costUsd": 0.001382,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Lead",
+            "status": "ok"
+          },
+          {
+            "name": "Property",
+            "status": "ok"
+          },
+          {
+            "name": "Deal",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "whatsapp",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [
+          {
+            "name": "trigger notifications when a deal closes",
+            "status": "missing"
+          }
+        ],
+        "features": [
+          {
+            "name": "lead management",
+            "status": "ok"
+          },
+          {
+            "name": "property management",
+            "status": "partial"
+          },
+          {
+            "name": "deal management",
+            "status": "partial"
+          },
+          {
+            "name": "analytics",
+            "status": "missing"
+          },
+          {
+            "name": "notifications",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 60
+      }
     },
     {
       "id": 2,
@@ -74,8 +124,8 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 7800,
-      "estimatedCostUsd": 0,
+      "latencyMs": 7984,
+      "estimatedCostUsd": 0.00302005,
       "integrationsDetected": [
         "slack"
       ],
@@ -89,27 +139,77 @@
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1629,
-          "costUsd": 0,
+          "latencyMs": 884,
+          "costUsd": 0.00003455,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3067,
-          "costUsd": 0,
+          "latencyMs": 3655,
+          "costUsd": 0.0016049999999999999,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2661,
-          "costUsd": 0,
+          "latencyMs": 2268,
+          "costUsd": 0.0013805000000000002,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Task",
+            "status": "ok"
+          },
+          {
+            "name": "Assignee",
+            "status": "ok"
+          },
+          {
+            "name": "TeamLead",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "slack",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [
+          {
+            "name": "send Slack message when task is overdue",
+            "status": "partial"
+          }
+        ],
+        "features": [
+          {
+            "name": "task_management",
+            "status": "missing"
+          },
+          {
+            "name": "due_dates",
+            "status": "missing"
+          },
+          {
+            "name": "assignees",
+            "status": "missing"
+          },
+          {
+            "name": "priorities",
+            "status": "missing"
+          },
+          {
+            "name": "status_updates",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 45
+      }
     },
     {
       "id": 3,
@@ -121,11 +221,9 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 10852,
-      "estimatedCostUsd": 0,
-      "integrationsDetected": [
-        "gmail"
-      ],
+      "latencyMs": 7817,
+      "estimatedCostUsd": 0.00306196,
+      "integrationsDetected": [],
       "integrationsInSpec": [
         "gmail"
       ],
@@ -136,27 +234,68 @@
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 3893,
-          "costUsd": 0,
+          "latencyMs": 744,
+          "costUsd": 0.00003371,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3639,
-          "costUsd": 0,
+          "latencyMs": 3865,
+          "costUsd": 0.0015995,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2310,
-          "costUsd": 0,
+          "latencyMs": 2194,
+          "costUsd": 0.00142875,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Product",
+            "status": "ok"
+          },
+          {
+            "name": "StockMovement",
+            "status": "ok"
+          },
+          {
+            "name": "Supplier",
+            "status": "ok"
+          }
+        ],
+        "integrations": [],
+        "businessRules": [
+          {
+            "name": "trigger email alert when stock level falls below a certain threshold",
+            "status": "partial"
+          }
+        ],
+        "features": [
+          {
+            "name": "product management",
+            "status": "partial"
+          },
+          {
+            "name": "stock movement tracking",
+            "status": "partial"
+          },
+          {
+            "name": "supplier management",
+            "status": "ok"
+          },
+          {
+            "name": "low stock alerts",
+            "status": "partial"
+          }
+        ],
+        "overallPercent": 75
+      }
     },
     {
       "id": 4,
@@ -168,8 +307,8 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 12472,
-      "estimatedCostUsd": 0,
+      "latencyMs": 6358,
+      "estimatedCostUsd": 0.00334468,
       "integrationsDetected": [
         "slack"
       ],
@@ -178,32 +317,74 @@
       ],
       "entityCount": 3,
       "pageCount": 3,
-      "endpointCount": 3,
+      "endpointCount": 4,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 5347,
-          "costUsd": 0,
+          "latencyMs": 638,
+          "costUsd": 0.00003443,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3080,
-          "costUsd": 0,
+          "latencyMs": 3256,
+          "costUsd": 0.00169875,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2473,
-          "costUsd": 0,
+          "latencyMs": 2395,
+          "costUsd": 0.0016115,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Employee",
+            "status": "ok"
+          },
+          {
+            "name": "LeaveRequest",
+            "status": "ok"
+          },
+          {
+            "name": "PerformanceReview",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "slack",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [
+          {
+            "name": "notify manager on Slack when leave is approved",
+            "status": "partial"
+          }
+        ],
+        "features": [
+          {
+            "name": "employee tracking",
+            "status": "partial"
+          },
+          {
+            "name": "leave request management",
+            "status": "partial"
+          },
+          {
+            "name": "performance review management",
+            "status": "partial"
+          }
+        ],
+        "overallPercent": 75
+      }
     },
     {
       "id": 5,
@@ -215,8 +396,8 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 14023,
-      "estimatedCostUsd": 0,
+      "latencyMs": 7907,
+      "estimatedCostUsd": 0.00339596,
       "integrationsDetected": [
         "stripe",
         "gmail"
@@ -227,32 +408,86 @@
       ],
       "entityCount": 4,
       "pageCount": 3,
-      "endpointCount": 4,
+      "endpointCount": 3,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1664,
-          "costUsd": 0,
+          "latencyMs": 1111,
+          "costUsd": 0.00003371,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3524,
-          "costUsd": 0,
+          "latencyMs": 3319,
+          "costUsd": 0.00177425,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 7861,
-          "costUsd": 0,
+          "latencyMs": 2394,
+          "costUsd": 0.001588,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Product",
+            "status": "ok"
+          },
+          {
+            "name": "Order",
+            "status": "ok"
+          },
+          {
+            "name": "Customer",
+            "status": "ok"
+          },
+          {
+            "name": "Payment",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "stripe",
+            "status": "ok"
+          },
+          {
+            "name": "gmail",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [
+          {
+            "name": "trigger payment processing when order is confirmed",
+            "status": "partial"
+          }
+        ],
+        "features": [
+          {
+            "name": "product management",
+            "status": "partial"
+          },
+          {
+            "name": "order management",
+            "status": "partial"
+          },
+          {
+            "name": "customer management",
+            "status": "partial"
+          },
+          {
+            "name": "payment processing",
+            "status": "partial"
+          }
+        ],
+        "overallPercent": 77
+      }
     },
     {
       "id": 6,
@@ -264,42 +499,79 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 9404,
-      "estimatedCostUsd": 0,
+      "latencyMs": 6343,
+      "estimatedCostUsd": 0.00224073,
       "integrationsDetected": [
         "whatsapp"
       ],
       "integrationsInSpec": [
         "whatsapp"
       ],
-      "entityCount": 4,
-      "pageCount": 4,
-      "endpointCount": 4,
+      "entityCount": 2,
+      "pageCount": 2,
+      "endpointCount": 2,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1492,
-          "costUsd": 0,
+          "latencyMs": 730,
+          "costUsd": 0.00003498,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3639,
-          "costUsd": 0,
+          "latencyMs": 2470,
+          "costUsd": 0.001104,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2799,
-          "costUsd": 0,
+          "latencyMs": 1944,
+          "costUsd": 0.00110175,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Event",
+            "status": "ok"
+          },
+          {
+            "name": "Attendee",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "whatsapp",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [],
+        "features": [
+          {
+            "name": "event creation",
+            "status": "partial"
+          },
+          {
+            "name": "attendee registration",
+            "status": "partial"
+          },
+          {
+            "name": "QR code check-in",
+            "status": "missing"
+          },
+          {
+            "name": "WhatsApp confirmation",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 57
+      }
     },
     {
       "id": 7,
@@ -311,8 +583,8 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 7773,
-      "estimatedCostUsd": 0,
+      "latencyMs": 8009,
+      "estimatedCostUsd": 0.00305227,
       "integrationsDetected": [
         "jira",
         "google_sheets"
@@ -328,27 +600,85 @@
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1713,
-          "costUsd": 0,
+          "latencyMs": 1061,
+          "costUsd": 0.000036020000000000004,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 2874,
-          "costUsd": 0,
+          "latencyMs": 2979,
+          "costUsd": 0.001464,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2541,
-          "costUsd": 0,
+          "latencyMs": 2505,
+          "costUsd": 0.00155225,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Project",
+            "status": "ok"
+          },
+          {
+            "name": "Milestone",
+            "status": "ok"
+          },
+          {
+            "name": "Task",
+            "status": "ok"
+          }
+        ],
+        "integrations": [
+          {
+            "name": "jira",
+            "status": "ok"
+          },
+          {
+            "name": "google_sheets",
+            "status": "ok"
+          }
+        ],
+        "businessRules": [
+          {
+            "name": "sync tasks to Jira",
+            "status": "missing"
+          },
+          {
+            "name": "update Google Sheet with weekly progress",
+            "status": "partial"
+          }
+        ],
+        "features": [
+          {
+            "name": "projects",
+            "status": "missing"
+          },
+          {
+            "name": "milestones",
+            "status": "missing"
+          },
+          {
+            "name": "tasks",
+            "status": "missing"
+          },
+          {
+            "name": "task_sync",
+            "status": "missing"
+          },
+          {
+            "name": "google_sheet_integration",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 46
+      }
     },
     {
       "id": 8,
@@ -360,8 +690,8 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 1630,
-      "estimatedCostUsd": 0,
+      "latencyMs": 1658,
+      "estimatedCostUsd": 0.0000307,
       "integrationsDetected": [],
       "integrationsInSpec": [],
       "entityCount": 0,
@@ -371,8 +701,8 @@
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1214,
-          "costUsd": 0,
+          "latencyMs": 634,
+          "costUsd": 0.0000307,
           "repairEntries": 0
         }
       ],
@@ -389,38 +719,70 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 9371,
-      "estimatedCostUsd": 0,
+      "latencyMs": 6387,
+      "estimatedCostUsd": 0.00278037,
       "integrationsDetected": [],
       "integrationsInSpec": [],
-      "entityCount": 5,
+      "entityCount": 3,
       "pageCount": 3,
       "endpointCount": 3,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1618,
-          "costUsd": 0,
+          "latencyMs": 661,
+          "costUsd": 0.00003487,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 4233,
-          "costUsd": 0,
+          "latencyMs": 3354,
+          "costUsd": 0.001578,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2242,
-          "costUsd": 0,
+          "latencyMs": 1850,
+          "costUsd": 0.0011675000000000001,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Patient",
+            "status": "ok"
+          },
+          {
+            "name": "Doctor",
+            "status": "ok"
+          },
+          {
+            "name": "TreatmentPlan",
+            "status": "ok"
+          }
+        ],
+        "integrations": [],
+        "businessRules": [],
+        "features": [
+          {
+            "name": "note-taking",
+            "status": "missing"
+          },
+          {
+            "name": "organization",
+            "status": "missing"
+          },
+          {
+            "name": "collaboration",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 50
+      }
     },
     {
       "id": 10,
@@ -432,42 +794,90 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 8892,
-      "estimatedCostUsd": 0,
-      "integrationsDetected": [
-        "stripe"
-      ],
-      "integrationsInSpec": [
-        "stripe"
-      ],
-      "entityCount": 5,
+      "latencyMs": 6289,
+      "estimatedCostUsd": 0.00277538,
+      "integrationsDetected": [],
+      "integrationsInSpec": [],
+      "entityCount": 3,
       "pageCount": 3,
       "endpointCount": 3,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1994,
-          "costUsd": 0,
+          "latencyMs": 866,
+          "costUsd": 0.000037879999999999996,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3890,
-          "costUsd": 0,
+          "latencyMs": 2912,
+          "costUsd": 0.0015365,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2413,
-          "costUsd": 0,
+          "latencyMs": 1853,
+          "costUsd": 0.0012009999999999998,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "User",
+            "status": "ok"
+          },
+          {
+            "name": "Order",
+            "status": "ok"
+          },
+          {
+            "name": "Product",
+            "status": "ok"
+          }
+        ],
+        "integrations": [],
+        "businessRules": [],
+        "features": [
+          {
+            "name": "login",
+            "status": "missing"
+          },
+          {
+            "name": "payments",
+            "status": "missing"
+          },
+          {
+            "name": "roles",
+            "status": "missing"
+          },
+          {
+            "name": "real-time chat",
+            "status": "missing"
+          },
+          {
+            "name": "file uploads",
+            "status": "missing"
+          },
+          {
+            "name": "native mobile",
+            "status": "missing"
+          },
+          {
+            "name": "analytics",
+            "status": "missing"
+          },
+          {
+            "name": "marketplace",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 27
+      }
     },
     {
       "id": 11,
@@ -479,38 +889,66 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 8305,
-      "estimatedCostUsd": 0,
+      "latencyMs": 6262,
+      "estimatedCostUsd": 0.0026628700000000003,
       "integrationsDetected": [],
       "integrationsInSpec": [],
       "entityCount": 3,
-      "pageCount": 4,
+      "pageCount": 3,
       "endpointCount": 3,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1430,
-          "costUsd": 0,
+          "latencyMs": 1337,
+          "costUsd": 0.000032370000000000003,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 2785,
-          "costUsd": 0,
+          "latencyMs": 2842,
+          "costUsd": 0.0014495,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2448,
-          "costUsd": 0,
+          "latencyMs": 1947,
+          "costUsd": 0.001181,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Lead",
+            "status": "ok"
+          },
+          {
+            "name": "Project",
+            "status": "ok"
+          },
+          {
+            "name": "Invoice",
+            "status": "ok"
+          }
+        ],
+        "integrations": [],
+        "businessRules": [],
+        "features": [
+          {
+            "name": "project management",
+            "status": "ok"
+          },
+          {
+            "name": "invoicing",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 80
+      }
     },
     {
       "id": 12,
@@ -522,38 +960,62 @@
       "repairStrategiesUsed": [],
       "totalRepairEntries": 0,
       "retryCount": 0,
-      "latencyMs": 8294,
-      "estimatedCostUsd": 0,
+      "latencyMs": 6319,
+      "estimatedCostUsd": 0.00186843,
       "integrationsDetected": [],
       "integrationsInSpec": [],
-      "entityCount": 3,
-      "pageCount": 3,
-      "endpointCount": 3,
+      "entityCount": 2,
+      "pageCount": 2,
+      "endpointCount": 2,
       "stages": [
         {
           "stage": "intent",
           "calls": 1,
-          "latencyMs": 1924,
-          "costUsd": 0,
+          "latencyMs": 1198,
+          "costUsd": 0.000029430000000000005,
           "repairEntries": 0
         },
         {
           "stage": "schema",
           "calls": 1,
-          "latencyMs": 3434,
-          "costUsd": 0,
+          "latencyMs": 1975,
+          "costUsd": 0.00097225,
           "repairEntries": 0
         },
         {
           "stage": "appspec",
           "calls": 1,
-          "latencyMs": 2081,
-          "costUsd": 0,
+          "latencyMs": 1739,
+          "costUsd": 0.00086675,
           "repairEntries": 0
         }
       ],
       "errors": [],
-      "coverage": null
+      "coverage": {
+        "entities": [
+          {
+            "name": "Task",
+            "status": "ok"
+          },
+          {
+            "name": "Project",
+            "status": "ok"
+          }
+        ],
+        "integrations": [],
+        "businessRules": [],
+        "features": [
+          {
+            "name": "task_management",
+            "status": "missing"
+          },
+          {
+            "name": "scheduling",
+            "status": "missing"
+          }
+        ],
+        "overallPercent": 50
+      }
     }
   ]
 }

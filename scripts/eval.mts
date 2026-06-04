@@ -6,6 +6,7 @@
  */
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { CoverageSummary } from "@/lib/coverage";
 
 const BASE = process.argv.includes("--base")
   ? process.argv[process.argv.indexOf("--base") + 1] ?? "http://localhost:3000"
@@ -91,6 +92,7 @@ interface EvalEntry {
   endpointCount: number;
   stages: StageResult[];
   errors: { code: string; message: string }[];
+  coverage: CoverageSummary | null;
 }
 
 async function post(url: string, body: unknown): Promise<unknown> {
@@ -176,7 +178,7 @@ async function runPrompt(p: typeof PROMPTS[number]): Promise<EvalEntry> {
     endpointCount: st.appSpec?.apiEndpoints?.length ?? 0,
     stages,
     errors: (st.errors ?? []).map((e: {code:string;message:string}) => ({ code: e.code, message: e.message.slice(0, 200) })),
-    coverage: st.coverageSummary ?? null,
+    coverage: st.coverage ?? null,
   };
 
   const icon = entry.success ? "✓" : entry.clarificationRequired ? "?" : "✗";
@@ -193,6 +195,7 @@ function failEntry(p: typeof PROMPTS[number], latencyMs: number, message: string
     integrationsDetected: [], integrationsInSpec: [],
     entityCount: 0, pageCount: 0, endpointCount: 0, stages: [],
     errors: [{ code: "NETWORK", message }],
+    coverage: null,
   };
 }
 
@@ -272,11 +275,13 @@ ${results.map((r) => {
 Most common failure type: ${failures === 0 ? "none — all prompts resolved" : `stage failures at "${weakestStage}"`}.
 Weakest stage: **${weakestStage}**.
 
-The pipeline consistently resolved structured prompts on the first pass. Edge-case handling: ultra-vague prompts (#8) and ambiguous domains (#9) triggered the clarification policy; overscoped (#10) and conflicting-domain (#11) prompts were reduced to MVPs with documented cuts; vague modifiers (#12) proceeded with explicit assumptions.
+Edge-case handling: ultra-vague and ambiguous prompts triggered the clarification policy; overscoped and conflicting-domain prompts reduced to an MVP / primary domain with documented cuts; vague modifiers proceeded with explicit assumptions.
 
-Repair engine impact: deterministic repairs (tenantId injection, inverse-relation synthesis, endpoint synthesis) handled all cross-layer inconsistencies without model re-prompts. Structural repair (jsonrepair) recovered fenced or truncated JSON where needed.
+Repair engine impact: ${repairTotal === 0
+  ? "0 repair entries this run — outputs passed validation first-pass. The three repair strategies are exercised by the unit suite and the POST /api/generate/:id/repair endpoint (malformed-input injection), not by this happy-path run."
+  : `${repairTotal} repair entries across ${retryTotal} extra model call(s); strategies: ${strategySet.join(", ")}.`}
 
-**One concrete fix for next iteration:** add JSON-mode enforcement at the Gemini fallback layer — Gemini 2.5 Flash occasionally wraps responses in markdown fences when jsonMode=true is not honoured by the model-side, requiring a structural repair pass that an adapter-level response-schema constraint would eliminate.
+**One concrete fix for next iteration:** tighten the Stage-1 to Stage-3 business-rule to workflow.trigger.condition mapping (carry the rule's numeric tokens, e.g. +3/+7/+14/+30, into the generated condition) so business-rule coverage moves from PARTIAL to OK more often; and add a per-stage model A/B to this harness to quantify quality vs. cost.
 `.trim();
 
   const summaryPath = path.join(process.cwd(), "eval-summary.md");

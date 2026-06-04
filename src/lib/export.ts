@@ -1,5 +1,4 @@
 import type { JobStatusResponse } from "@/lib/jobs";
-import type { AppIntent, DataSchema, AppSpec } from "@/lib/schemas";
 import { jsPDF } from "jspdf";
 
 // ── helpers ──────────────────────────────────────────────────────────────────

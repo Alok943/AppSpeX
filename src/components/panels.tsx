@@ -361,12 +361,6 @@ export function WorkflowsPanel({ appSpec }: { appSpec: AppSpec | null }) {
 
 // --- errors + repairs -------------------------------------------------------
 
-const OUTCOME_COLOR: Record<string, string> = {
-  repaired: "text-emerald-300",
-  escalated: "text-amber-300",
-  failed: "text-rose-300",
-};
-
 const HEALTHY_REPAIRS = [
   "added tenantId",
   "added inverse",

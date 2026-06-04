@@ -35,6 +35,7 @@ function fakeRun(id: string, cost: number): JobStatusResponse {
       ],
       perProvider: { groq: cost },
     },
+    coverage: null,
   };
 }
 

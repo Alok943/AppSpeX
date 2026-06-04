@@ -128,20 +128,28 @@ invalid action — is a **validation error**.
 
 ## Model routing & cost
 
-Routing lives in one file: **`src/lib/gateway/routing.config.ts`**. Models are referenced by
-logical id; the model pool and per-token USD rates are in `gateway/models.ts`.
+Routing is **config-driven** in one file — **`src/lib/gateway/routing.config.ts`**. Stage code
+never names a model; it calls `gateway.generate(stage, req)`. The model pool and per-token USD
+rates live in `gateway/models.ts`.
 
-| Model | Provider | $/1M (in / out) |
+**Routing logic = by stage workload.** Light stages (tiny output) stay on Groq — fastest and
+cheapest, no per-minute output-token timeout. Output-heavy stages (large JSON) go to Gemini,
+which has the throughput headroom Groq lacks. Fallbacks are cross-provider for resilience.
+
+| Stage | Primary | Fallback |
 |---|---|---|
-| `llama-3.1-8b-instant` | Groq | 0.05 / 0.08 |
-| `openai/gpt-oss-20b` | Groq | 0.075 / 0.30 |
-| `openai/gpt-oss-120b` | Groq | 0.15 / 0.60 |
-| `llama-3.3-70b-versatile` | Groq | 0.59 / 0.79 |
-| `gemini-2.5-flash` | Gemini | free tier ($0) |
-| `nvidia/nemotron-*:free` | OpenRouter | $0 (universal 429/5xx fallback) |
+| `intent` (tiny output) | Groq `llama-3.1-8b-instant` | Gemini 3.1 Flash Lite |
+| `repair` (one field) | Groq `llama-3.1-8b-instant` | Gemini 3.1 Flash Lite |
+| `schema` (large JSON) | **Gemini 3.1 Flash Lite** | Groq `llama-3.3-70b-versatile` |
+| `appspec` (largest JSON) | **Gemini 3.1 Flash Lite** | Groq `llama-3.3-70b-versatile` |
 
-Cheap, fast models do the work; **the repair engine is the reliability layer**, so we don't
-need a frontier model. Cost is logged and exposed on the job-status endpoint.
+On a **429/5xx** from the primary, the gateway first retries the **OpenRouter equivalent**
+(`nvidia/nemotron-*:free`, $0) before dropping to the stage's fallback. Per-token cost is
+computed from `COST_TABLE` and logged per stage + per provider on the job-status endpoint.
+
+Cheap models do the work and **the repair engine is the reliability layer**, so no frontier
+model is needed. The full 14-model pool (incl. `gpt-oss-20b/120b`, OpenAI, Anthropic, DeepSeek,
+Mistral) is supported — re-routing any stage is a one-line edit in `routing.config.ts`.
 
 ---
 

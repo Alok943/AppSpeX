@@ -10,19 +10,24 @@ export interface RouteConfig {
  * THE routing config. This is the single place pipeline stages are mapped to
  * models — stage code never names a model. Edit here to re-route.
  *
- *  - intent  -> cheapest fast model (Groq Llama 3.1 8B)
- *  - schema  -> most capable cheap model (Groq gpt-oss-120b)
- *  - appspec -> most capable cheap model (Groq gpt-oss-120b; hardest stage)
- *  - repair  -> fast model for narrow field re-prompts (Groq Llama 3.1 8B)
+ * Routing by stage WORKLOAD: light stages stay on Groq (fast + cheap, no
+ * per-minute output-token timeout); output-heavy stages go to Gemini 3.1 Flash
+ * Lite, which has the throughput headroom Groq lacks for large JSON.
  *
- * Gemini 2.5 Flash is the free-tier fallback. All models here are near-$0.
+ *  - intent  -> Groq Llama 3.1 8B       (tiny output)
+ *  - repair  -> Groq Llama 3.1 8B       (single-field re-prompts)
+ *  - schema  -> Gemini 3.1 Flash Lite   (large JSON)
+ *  - appspec -> Gemini 3.1 Flash Lite   (largest JSON)
+ *
+ * Fallbacks are cross-provider for resilience.
  *
  * On a 429/5xx from the primary, the gateway retries the OpenRouter equivalent
  * (universal fallback) before dropping to the stage's `fallback` model.
  */
 export const ROUTING: Record<StageName, RouteConfig> = {
-  intent: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
-  schema: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
-  appspec: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
-  repair: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
+  // Light output → Groq (fast, cheap, no TPM timeout). Heavy output → Gemini.
+  intent: { primary: "groq-llama-8b", fallback: "gemini-flash-lite" },
+  schema: { primary: "gemini-flash-lite", fallback: "groq-llama-70b" },
+  appspec: { primary: "gemini-flash-lite", fallback: "groq-llama-70b" },
+  repair: { primary: "groq-llama-8b", fallback: "gemini-flash-lite" },
 };
