@@ -26,8 +26,8 @@ export interface RouteConfig {
  */
 export const ROUTING: Record<StageName, RouteConfig> = {
   // Light output → Groq (fast, cheap, no TPM timeout). Heavy output → Gemini.
-  intent: { primary: "groq-llama-8b", fallback: "gemini-flash-lite" },
-  schema: { primary: "gemini-flash-lite", fallback: "groq-llama-70b" },
-  appspec: { primary: "gemini-flash-lite", fallback: "groq-llama-70b" },
-  repair: { primary: "groq-llama-8b", fallback: "gemini-flash-lite" },
+  intent: { primary: "groq-llama-8b", fallback: "gemini-3.1-flash-lite" },
+  schema: { primary: "gemini-3.1-flash-lite", fallback: "groq-llama-70b" },
+  appspec: { primary: "gemini-3.1-flash-lite", fallback: "groq-llama-70b" },
+  repair: { primary: "groq-llama-8b", fallback: "gemini-3.1-flash-lite" },
 };

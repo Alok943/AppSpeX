@@ -61,7 +61,7 @@ export const MODELS: Record<string, ModelDef> = {
     providerModel: "gemini-2.5-flash",
     openRouterModel: "google/gemma-4-31b-it:free",
   },
-  "gemini-flash-lite": {
+  "gemini-3.1-flash-lite": {
     provider: "gemini",
     providerModel: "gemini-3.1-flash-lite",
     openRouterModel: "google/gemma-4-31b-it:free",
