@@ -10,17 +10,19 @@ export interface RouteConfig {
  * THE routing config. This is the single place pipeline stages are mapped to
  * models — stage code never names a model. Edit here to re-route.
  *
- *  - intent  -> fast/cheap model (Groq Llama 8b)
- *  - schema  -> capable model (Gemini 1.5 Pro)
- *  - appspec -> same tier as schema
- *  - repair  -> fast model for narrow field re-prompts
+ *  - intent  -> cheapest fast model (Groq Llama 3.1 8B)
+ *  - schema  -> cheap reasoning model (Groq gpt-oss-20b)
+ *  - appspec -> most capable cheap model (Groq gpt-oss-120b; hardest stage)
+ *  - repair  -> fast model for narrow field re-prompts (Groq Llama 3.1 8B)
+ *
+ * Gemini 2.5 Flash is the free-tier fallback. All models here are near-$0.
  *
  * On a 429/5xx from the primary, the gateway retries the OpenRouter equivalent
  * (universal fallback) before dropping to the stage's `fallback` model.
  */
 export const ROUTING: Record<StageName, RouteConfig> = {
   intent: { primary: "groq-llama-8b", fallback: "gemini-flash" },
-  schema: { primary: "gemini-pro", fallback: "groq-llama-70b" },
-  appspec: { primary: "gemini-pro", fallback: "groq-llama-70b" },
+  schema: { primary: "groq-gpt-oss-20b", fallback: "gemini-flash" },
+  appspec: { primary: "groq-gpt-oss-120b", fallback: "gemini-flash" },
   repair: { primary: "groq-llama-8b", fallback: "gemini-flash" },
 };

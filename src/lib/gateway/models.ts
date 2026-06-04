@@ -14,8 +14,8 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
   groq: { adapter: openAICompatible("https://api.groq.com/openai/v1"), envKey: "GROQ_API_KEY" },
   openrouter: {
     adapter: openAICompatible("https://openrouter.ai/api/v1", {
-      "HTTP-Referer": "https://oneatlas.dev",
-      "X-Title": "OneAtlas",
+      "HTTP-Referer": "https://appspex.dev",
+      "X-Title": "AppSpeX",
     }),
     envKey: "OPENROUTER_API_KEY",
   },
@@ -38,29 +38,34 @@ export interface ModelDef {
 
 /** Logical model ids the routing config references. */
 export const MODELS: Record<string, ModelDef> = {
+  // Groq — fast + cheap; primaries for every stage. OpenRouter ":free" models
+  // are the equivalents used for the universal 429/5xx fallback (also $0).
   "groq-llama-8b": {
     provider: "groq",
     providerModel: "llama-3.1-8b-instant",
-    openRouterModel: "meta-llama/llama-3.1-8b-instruct",
+    openRouterModel: "nvidia/nemotron-nano-9b-v2:free",
   },
+  "groq-gpt-oss-20b": {
+    provider: "groq",
+    providerModel: "openai/gpt-oss-20b",
+    openRouterModel: "nvidia/nemotron-3-super-120b-a12b:free",
+  },
+  "groq-gpt-oss-120b": {
+    provider: "groq",
+    providerModel: "openai/gpt-oss-120b",
+    openRouterModel: "nvidia/nemotron-3-super-120b-a12b:free",
+  },
+  // Gemini — free-tier fallback (2.5 Flash has free quota for this key).
+  "gemini-flash": {
+    provider: "gemini",
+    providerModel: "gemini-2.5-flash",
+    openRouterModel: "google/gemma-4-31b-it:free",
+  },
+  // Available but not in the default routing.
   "groq-llama-70b": {
     provider: "groq",
     providerModel: "llama-3.3-70b-versatile",
-    openRouterModel: "meta-llama/llama-3.3-70b-instruct",
-  },
-  "gemini-flash": {
-    provider: "gemini",
-    providerModel: "gemini-1.5-flash",
-    openRouterModel: "google/gemini-flash-1.5",
-  },
-  "gemini-pro": {
-    provider: "gemini",
-    providerModel: "gemini-1.5-pro",
-    openRouterModel: "google/gemini-pro-1.5",
-  },
-  "openrouter-llama-70b": {
-    provider: "openrouter",
-    providerModel: "meta-llama/llama-3.3-70b-instruct",
+    openRouterModel: "nvidia/nemotron-3-super-120b-a12b:free",
   },
 };
 
@@ -69,16 +74,23 @@ export interface CostRate {
   outputPer1M: number;
 }
 
-/** Per-model USD rates per 1M tokens. Keyed by the provider's model string. */
+/**
+ * Per-model USD rates per 1M tokens, keyed by the provider's model string.
+ * Groq prices are exact list prices. Gemini runs on the free tier here ($0).
+ * OpenRouter ":free" variants are genuinely $0.
+ */
 export const COST_TABLE: Record<string, CostRate> = {
+  // Groq (exact list prices).
   "llama-3.1-8b-instant": { inputPer1M: 0.05, outputPer1M: 0.08 },
+  "openai/gpt-oss-20b": { inputPer1M: 0.075, outputPer1M: 0.3 },
+  "openai/gpt-oss-120b": { inputPer1M: 0.15, outputPer1M: 0.6 },
   "llama-3.3-70b-versatile": { inputPer1M: 0.59, outputPer1M: 0.79 },
-  "gemini-1.5-flash": { inputPer1M: 0.075, outputPer1M: 0.3 },
-  "gemini-1.5-pro": { inputPer1M: 1.25, outputPer1M: 5.0 },
-  "meta-llama/llama-3.1-8b-instruct": { inputPer1M: 0.05, outputPer1M: 0.05 },
-  "meta-llama/llama-3.3-70b-instruct": { inputPer1M: 0.12, outputPer1M: 0.3 },
-  "google/gemini-flash-1.5": { inputPer1M: 0.075, outputPer1M: 0.3 },
-  "google/gemini-pro-1.5": { inputPer1M: 1.25, outputPer1M: 5.0 },
+  // Gemini — free tier for this key.
+  "gemini-2.5-flash": { inputPer1M: 0, outputPer1M: 0 },
+  // OpenRouter ":free" variants.
+  "nvidia/nemotron-nano-9b-v2:free": { inputPer1M: 0, outputPer1M: 0 },
+  "nvidia/nemotron-3-super-120b-a12b:free": { inputPer1M: 0, outputPer1M: 0 },
+  "google/gemma-4-31b-it:free": { inputPer1M: 0, outputPer1M: 0 },
 };
 
 /** USD cost for a generation. Unknown models cost 0 (logged as such). */

@@ -40,6 +40,14 @@ export interface AdapterArgs {
 /** A provider adapter: one function per API shape. */
 export type ProviderAdapter = (args: AdapterArgs) => Promise<RawCompletion>;
 
+/**
+ * The capability stages depend on: turn a request into a completion. The
+ * concrete `Gateway` class satisfies this structurally; tests inject a fake.
+ */
+export interface LlmGateway {
+  generate(stage: StageName, req: GatewayRequest): Promise<GatewayResponse>;
+}
+
 /** Final gateway result, including cost + telemetry. */
 export interface GatewayResponse {
   text: string;

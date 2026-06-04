@@ -1,8 +1,9 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@700&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #070713;
+  --foreground: #e7e9f3;
 }
 
 @theme inline {
@@ -12,15 +13,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  color: var(--foreground);
+  min-height: 100vh;
+  background:
+    radial-gradient(55rem 55rem at 12% -10%, rgba(99, 102, 241, 0.28), transparent 60%),
+    radial-gradient(48rem 48rem at 110% 5%, rgba(168, 85, 247, 0.22), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 120%, rgba(14, 165, 233, 0.18), transparent 60%),
+    #070713;
+  background-attachment: fixed;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Frosted-glass surface for panels. Chrome is glassy; data inside stays crisp. */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
