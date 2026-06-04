@@ -1,4 +1,5 @@
-# AppSpeX(appspex.up.railway.app)
+# AppSpeX
+deployed link -: http://appspex.up.railway.app
 
 A multi-stage AI generation pipeline that turns a plain-English app description into a
 **validated, machine-readable AppSpec** — the structured configuration object a downstream
