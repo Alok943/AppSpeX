@@ -67,7 +67,7 @@ All three required keys have usable **free tiers** — a full 12-prompt evaluati
 ```
 POST /api/generate ─► Job (in-memory + SSE) ─► runPipeline
                                                    │
-   Stage 1  INTENT    raw prompt ─► AppIntent     │  validate (shape) ─► repair
+   Stage 1  INTENT    raw prompt ─► AppIntent      │  validate (shape) ─► repair
    Stage 2  SCHEMA    AppIntent  ─► DataSchema     │  validate (shape + cross-layer) ─► repair
    Stage 3  APPSPEC   DataSchema ─► AppSpec        │  validate (cross-layer) ─► repair
                                                    ▼
@@ -160,7 +160,7 @@ Mistral) is supported — re-routing any stage is a one-line edit in `routing.co
 | `POST` | `/api/generate` | `{ prompt }` → `{ jobId }` |
 | `GET` | `/api/generate/:id/stream` | SSE: `stage_start`, `stage_complete`, `stage_failed`, `clarification_required`, `generation_complete`; replays prior events on reconnect |
 | `GET` | `/api/generate/:id` | Job status: full AppSpec (or error), repair log, cost breakdown (tokens + USD per stage/provider), latency per stage |
-| `POST` | `/api/generate/:id/repair` | `{ stage, errorHint }` — manually trigger a repair pass |
+| `POST`| `/api/generate/:id/repair` | `{ stage, errorHint }` — manually trigger a repair pass |
 | `GET` | `/api/integrations` | The full integration registry |
 | `GET` | `/api/runs` | Cumulative cost totals + run history |
 | `GET` | `/api/runs/:id` | A full persisted past run |
