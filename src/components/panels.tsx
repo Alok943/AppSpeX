@@ -131,6 +131,136 @@ export function PromptUnderstandingPanel({ intent }: { intent: AppIntent | null 
   );
 }
 
+// --- Coverage ---------------------------------------------------------------
+
+export function RequirementCoveragePanel({
+  intent,
+  appSpec,
+  dataSchema,
+}: {
+  intent: AppIntent | null;
+  appSpec: AppSpec | null;
+  dataSchema: DataSchema | null;
+}) {
+  if (!intent || !appSpec || !dataSchema) return null;
+
+  const schemaEntityNames = new Set(dataSchema.entities.map((e) => e.name.toLowerCase()));
+  const entityCoverage = intent.entities.map((e) => ({
+    name: e,
+    covered: schemaEntityNames.has(e.toLowerCase()),
+  }));
+
+  const allHooks = new Set([
+    ...appSpec.integrationHooks.map((h) => h.integration),
+    ...appSpec.workflowStubs.map((w) => w.integration),
+  ]);
+  const integrationCoverage = intent.integrations_requested.map((i) => ({
+    name: i,
+    covered: allHooks.has(i),
+  }));
+
+  const workflowText = appSpec.workflowStubs
+    .map((w) => `${w.trigger.condition || ""} ${w.name}`)
+    .join(" ")
+    .toLowerCase();
+  const businessRuleCoverage = (intent.businessRules || []).map((r) => ({
+    name: r,
+    covered: workflowText.includes(r.toLowerCase()) || r.toLowerCase().split(/\s+/).some(word => word.length > 4 && workflowText.includes(word)),
+  }));
+
+  // Feature coverage checks entities, fields, pages, and workflows.
+  const appSpecText = [
+    ...appSpec.pages.map((p) => p.name),
+    ...dataSchema.entities.map((e) => e.name),
+    ...dataSchema.entities.flatMap((e) => e.fields.map((f) => f.name)),
+    ...appSpec.workflowStubs.map((w) => w.name),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const featureCoverage = intent.features.map((f) => {
+    const fLower = f.toLowerCase();
+    const isCovered = appSpecText.includes(fLower) || fLower.split(/\s+/).some((word) => word.length > 4 && appSpecText.includes(word));
+    return { name: f, covered: isCovered };
+  });
+
+  const totalItems =
+    entityCoverage.length +
+    integrationCoverage.length +
+    businessRuleCoverage.length +
+    featureCoverage.length;
+  const coveredItems =
+    entityCoverage.filter((x) => x.covered).length +
+    integrationCoverage.filter((x) => x.covered).length +
+    businessRuleCoverage.filter((x) => x.covered).length +
+    featureCoverage.filter((x) => x.covered).length;
+  const overallCoverage = totalItems > 0 ? Math.round((coveredItems / totalItems) * 100) : 100;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-8">
+        <Metric label="Overall Coverage" value={`${overallCoverage}%`} />
+        <Metric label="Features" value={`${featureCoverage.filter((x) => x.covered).length}/${featureCoverage.length}`} />
+        <Metric label="Entities" value={`${entityCoverage.filter((x) => x.covered).length}/${entityCoverage.length}`} />
+        <Metric label="Integrations" value={`${integrationCoverage.filter((x) => x.covered).length}/${integrationCoverage.length}`} />
+        {businessRuleCoverage.length > 0 && (
+          <Metric label="Business Rules" value={`${businessRuleCoverage.filter((x) => x.covered).length}/${businessRuleCoverage.length}`} />
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Features</h3>
+          <ul className="space-y-1">
+            {featureCoverage.map((x, i) => (
+              <li key={i} className="flex gap-2 text-sm text-slate-300">
+                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
+                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Entities</h3>
+          <ul className="space-y-1">
+            {entityCoverage.map((x, i) => (
+              <li key={i} className="flex gap-2 text-sm text-slate-300">
+                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
+                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Integrations</h3>
+          <ul className="space-y-1">
+            {integrationCoverage.map((x, i) => (
+              <li key={i} className="flex gap-2 text-sm text-slate-300">
+                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
+                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+              </li>
+            ))}
+            {integrationCoverage.length === 0 && <li className="text-sm text-slate-500">None requested</li>}
+          </ul>
+        </div>
+        {businessRuleCoverage.length > 0 && (
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Business Rules</h3>
+            <ul className="space-y-1">
+              {businessRuleCoverage.map((x, i) => (
+                <li key={i} className="flex gap-2 text-sm text-slate-300">
+                  <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
+                  <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // --- Entities ---------------------------------------------------------------
 
 export function EntitiesPanel({ dataSchema }: { dataSchema: DataSchema | null }) {
@@ -194,21 +324,35 @@ export function PagesApisPanel({ appSpec }: { appSpec: AppSpec | null }) {
       </div>
       <div>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">API Endpoints</h3>
-        <Table head={["Method", "Path", "Entity", "Auth", "Rate limit"]}>
-          {appSpec.apiEndpoints.map((ep, i) => (
-            <tr key={i} className="border-t border-white/5">
-              <Td>
-                <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-xs font-semibold text-indigo-200">
-                  {ep.method}
-                </span>
-              </Td>
-              <Td mono>{ep.path}</Td>
-              <Td>{ep.entity}</Td>
-              <Td>{ep.authRequired ? "Yes" : "No"}</Td>
-              <Td>{ep.rateLimit ? "Yes" : "No"}</Td>
-            </tr>
-          ))}
-        </Table>
+        <div className="space-y-3">
+          {Array.from(new Set(appSpec.apiEndpoints.map((ep) => ep.entity))).map((entity) => {
+            const endpoints = appSpec.apiEndpoints.filter((ep) => ep.entity === entity);
+            return (
+              <details key={entity} className="group rounded-xl border border-white/10 bg-black/20" open={endpoints.length < 5}>
+                <summary className="flex cursor-pointer items-center justify-between p-3 text-sm font-medium text-slate-100 outline-none">
+                  <span>{entity} APIs <span className="ml-2 text-xs text-slate-500">({endpoints.length})</span></span>
+                  <span className="text-slate-500 transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div className="border-t border-white/5 p-3">
+                  <Table head={["Method", "Path", "Auth", "Rate limit"]}>
+                    {endpoints.map((ep, i) => (
+                      <tr key={i} className="border-t border-white/5">
+                        <Td>
+                          <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-xs font-semibold text-indigo-200">
+                            {ep.method}
+                          </span>
+                        </Td>
+                        <Td mono>{ep.path}</Td>
+                        <Td>{ep.authRequired ? "Yes" : "No"}</Td>
+                        <Td>{ep.rateLimit ? "Yes" : "No"}</Td>
+                      </tr>
+                    ))}
+                  </Table>
+                </div>
+              </details>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -265,16 +409,36 @@ const OUTCOME_COLOR: Record<string, string> = {
   failed: "text-rose-300",
 };
 
-export function RepairErrorPanel({
+const HEALTHY_REPAIRS = [
+  "added tenantId",
+  "added inverse",
+  "missing array",
+  "filled typed default"
+];
+
+const CONCERNING_REPAIRS = [
+  "synthesized",
+  "dropped",
+  "removed",
+  "generated fallback"
+];
+
+export function GenerationHealthPanel({
   repairLog,
   errors,
 }: {
   repairLog: JobStatusResponse["repairLog"];
   errors: ValidationError[];
 }) {
-  const totalRepairs = repairLog.reduce((n, s) => n + s.entries.length, 0);
+  const allEntries = repairLog.flatMap((stage) => stage.entries);
+  const totalRepairs = allEntries.length;
+
+  const healthy = allEntries.filter((e) => HEALTHY_REPAIRS.some((k) => e.detail.includes(k)));
+  const concerning = allEntries.filter((e) => CONCERNING_REPAIRS.some((k) => e.detail.includes(k)));
+  const other = allEntries.filter((e) => !healthy.includes(e) && !concerning.includes(e));
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {errors.length > 0 ? (
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-200">
@@ -288,40 +452,63 @@ export function RepairErrorPanel({
             ))}
           </ul>
         </div>
-      ) : (
-        <p className="text-sm text-emerald-300">No unresolved validation errors.</p>
-      )}
+      ) : null}
 
-      <div>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Repair log ({totalRepairs})
-        </h3>
-        {totalRepairs === 0 ? (
-          <p className="text-sm text-slate-500">No repairs were needed.</p>
-        ) : (
-          <div className="space-y-3">
-            {repairLog.map((stage) =>
-              stage.entries.length === 0 ? null : (
-                <div key={stage.stage}>
-                  <div className="text-xs font-medium text-slate-300">{stage.stage}</div>
-                  <ul className="mt-1 space-y-1">
-                    {stage.entries.map((entry, i) => (
-                      <li key={i} className="text-xs text-slate-300">
-                        <span className="rounded bg-white/5 px-1.5 py-0.5 text-[11px] uppercase text-slate-200">
-                          {entry.strategy}
-                        </span>{" "}
-                        <span className={OUTCOME_COLOR[entry.outcome] ?? "text-slate-300"}>{entry.outcome}</span>
-                        {" — "}
-                        {entry.detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ),
-            )}
-          </div>
-        )}
-      </div>
+      {totalRepairs === 0 && errors.length === 0 ? (
+        <p className="text-sm text-emerald-300">Perfect generation! No repairs or errors.</p>
+      ) : null}
+
+      {totalRepairs > 0 ? (
+        <div className="space-y-4">
+          {healthy.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                Healthy Repairs ({healthy.length})
+              </h3>
+              <ul className="space-y-1">
+                {healthy.map((entry, i) => (
+                  <li key={i} className="text-xs text-slate-300">
+                    <span className="text-emerald-400 mr-2">✓</span>
+                    {entry.detail}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {concerning.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
+                Concerning Repairs ({concerning.length})
+              </h3>
+              <ul className="space-y-1">
+                {concerning.map((entry, i) => (
+                  <li key={i} className="text-xs text-slate-300">
+                    <span className="text-amber-400 mr-2">⚠</span>
+                    {entry.detail}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {other.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Other Repairs ({other.length})
+              </h3>
+              <ul className="space-y-1">
+                {other.map((entry, i) => (
+                  <li key={i} className="text-xs text-slate-300">
+                    <span className="text-slate-500 mr-2">•</span>
+                    {entry.detail}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

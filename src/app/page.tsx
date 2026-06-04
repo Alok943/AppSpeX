@@ -14,7 +14,8 @@ import {
   EntitiesPanel,
   PagesApisPanel,
   WorkflowsPanel,
-  RepairErrorPanel,
+  RequirementCoveragePanel,
+  GenerationHealthPanel,
   CostPanel,
   RegistryPanel,
   HistoryPanel,
@@ -225,6 +226,12 @@ export default function Home() {
           </Card>
         ) : null}
 
+        {showOutput && intent && appSpec && dataSchema ? (
+          <Card title="Requirement Coverage">
+            <RequirementCoveragePanel intent={intent} appSpec={appSpec} dataSchema={dataSchema} />
+          </Card>
+        ) : null}
+
         {showOutput && dataSchema ? (
           <Card title="Entities & Fields">
             <EntitiesPanel dataSchema={dataSchema} />
@@ -244,8 +251,8 @@ export default function Home() {
 
         {showOutput && status ? (
           <>
-            <Card title="Validation & Repairs">
-              <RepairErrorPanel repairLog={status.repairLog} errors={status.errors} />
+            <Card title="Generation Health">
+              <GenerationHealthPanel repairLog={status.repairLog} errors={status.errors} />
             </Card>
             <Card title="Cost & Latency">
               <CostPanel cost={status.cost} />
