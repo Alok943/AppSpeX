@@ -3,6 +3,7 @@ import {
   AppIntentSchema,
   DataSchema,
   AppSpecSchema,
+  isTenantField,
   type AppIntent,
   type AppSpec,
   type RelationType,
@@ -57,7 +58,7 @@ export function validateDataSchema(raw: unknown): StageValidation<DataSchema> {
 
   data.entities.forEach((entity, i) => {
     // Every entity must carry a tenantId field.
-    if (!entity.fields.some((f) => f.name === "tenantId")) {
+    if (!entity.fields.some((f) => isTenantField(f.name))) {
       errors.push({
         code: "MISSING_TENANT_ID",
         path: `entities[${i}]`,

@@ -1,0 +1,559 @@
+{
+  "runAt": "2026-06-04T09:41:03.253Z",
+  "baseUrl": "http://localhost:3000",
+  "aggregate": {
+    "total": 12,
+    "successes": 11,
+    "clarifications": 1,
+    "failures": 0,
+    "successRate": "92%",
+    "clarificationRate": "8%",
+    "totalCostUsd": 0,
+    "avgCostUsd": 0,
+    "totalLatencyMs": 111352,
+    "avgLatencyMs": 9279,
+    "totalRepairEntries": 0,
+    "totalRetries": 0,
+    "weakestStage": "none"
+  },
+  "results": [
+    {
+      "id": 1,
+      "label": "Real Estate CRM",
+      "prompt": "Build a CRM for a real estate agency. Agents manage leads, properties, and deals. Admin sees analytics. WhatsApp notifications when a deal closes.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 12536,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "whatsapp"
+      ],
+      "integrationsInSpec": [
+        "whatsapp"
+      ],
+      "entityCount": 5,
+      "pageCount": 4,
+      "endpointCount": 4,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 2932,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 5602,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2777,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 2,
+      "label": "Engineering Task Manager",
+      "prompt": "Task manager for an engineering team. Tasks have due dates, assignees, priorities, and status. Team lead gets a Slack message when a task is overdue.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 7800,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "slack"
+      ],
+      "integrationsInSpec": [
+        "slack"
+      ],
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1629,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3067,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2661,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 3,
+      "label": "Warehouse Inventory",
+      "prompt": "Inventory system for a warehouse. Products, stock movements, suppliers. Low stock triggers an email alert.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 10852,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "gmail"
+      ],
+      "integrationsInSpec": [
+        "gmail"
+      ],
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 3893,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3639,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2310,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 4,
+      "label": "HR Tool",
+      "prompt": "HR tool for a 50-person company. Track employees, leave requests, and performance reviews. Notify manager on Slack when leave is approved.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 12472,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "slack"
+      ],
+      "integrationsInSpec": [
+        "slack"
+      ],
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 5347,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3080,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2473,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 5,
+      "label": "E-commerce Backend",
+      "prompt": "E-commerce backend. Products, orders, customers, payments via Stripe. Order confirmation sent via Gmail.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 14023,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "stripe",
+        "gmail"
+      ],
+      "integrationsInSpec": [
+        "stripe",
+        "gmail"
+      ],
+      "entityCount": 4,
+      "pageCount": 3,
+      "endpointCount": 4,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1664,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3524,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 7861,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 6,
+      "label": "Event Management",
+      "prompt": "Event management platform. Organizers create events, attendees register, QR check-in at the door. Confirmation via WhatsApp.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 9404,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "whatsapp"
+      ],
+      "integrationsInSpec": [
+        "whatsapp"
+      ],
+      "entityCount": 4,
+      "pageCount": 4,
+      "endpointCount": 4,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1492,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3639,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2799,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 7,
+      "label": "Project Tracker",
+      "prompt": "Project tracker. Projects, milestones, tasks. Sync tasks to Jira. Update a Google Sheet with weekly progress.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 7773,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "jira",
+        "google_sheets"
+      ],
+      "integrationsInSpec": [
+        "jira",
+        "google_sheets"
+      ],
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1713,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 2874,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2541,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 8,
+      "label": "Edge: ultra-vague",
+      "prompt": "An app.",
+      "success": false,
+      "clarificationRequired": true,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 1630,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [],
+      "integrationsInSpec": [],
+      "entityCount": 0,
+      "pageCount": 0,
+      "endpointCount": 0,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1214,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 9,
+      "label": "Edge: ambiguous domain",
+      "prompt": "Build something like Notion for doctors.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 9371,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [],
+      "integrationsInSpec": [],
+      "entityCount": 5,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1618,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 4233,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2242,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 10,
+      "label": "Edge: overscoped",
+      "prompt": "A platform with login, payments, roles, real-time chat, file uploads, native mobile, analytics, and a marketplace.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 8892,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [
+        "stripe"
+      ],
+      "integrationsInSpec": [
+        "stripe"
+      ],
+      "entityCount": 5,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1994,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3890,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2413,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 11,
+      "label": "Edge: conflicting domains",
+      "prompt": "A CRM but also a project manager but also an invoicing tool.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 8305,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [],
+      "integrationsInSpec": [],
+      "entityCount": 3,
+      "pageCount": 4,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1430,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 2785,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2448,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    },
+    {
+      "id": 12,
+      "label": "Edge: vague modifier",
+      "prompt": "Task manager, but make it smart.",
+      "success": true,
+      "clarificationRequired": false,
+      "failedStage": null,
+      "repairStrategiesUsed": [],
+      "totalRepairEntries": 0,
+      "retryCount": 0,
+      "latencyMs": 8294,
+      "estimatedCostUsd": 0,
+      "integrationsDetected": [],
+      "integrationsInSpec": [],
+      "entityCount": 3,
+      "pageCount": 3,
+      "endpointCount": 3,
+      "stages": [
+        {
+          "stage": "intent",
+          "calls": 1,
+          "latencyMs": 1924,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "schema",
+          "calls": 1,
+          "latencyMs": 3434,
+          "costUsd": 0,
+          "repairEntries": 0
+        },
+        {
+          "stage": "appspec",
+          "calls": 1,
+          "latencyMs": 2081,
+          "costUsd": 0,
+          "repairEntries": 0
+        }
+      ],
+      "errors": [],
+      "coverage": null
+    }
+  ]
+}

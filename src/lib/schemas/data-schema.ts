@@ -83,3 +83,7 @@ export const DataSchema = z.object({
   entities: z.array(EntitySchema),
 });
 export type DataSchema = z.infer<typeof DataSchema>;
+
+export function isTenantField(name: string): boolean {
+  return name.replace(/[_-]/g, "").toLowerCase() === "tenantid";
+}

@@ -6,6 +6,7 @@ import type {
   ApiEndpoint,
   Field,
 } from "@/lib/schemas";
+import { isTenantField } from "@/lib/schemas";
 import type { RegistryView } from "@/lib/validation";
 import type { RepairLogEntry, RepairResult } from "@/lib/repair/types";
 
@@ -58,7 +59,7 @@ export function repairDataSchemaConsistency(input: DataSchema): RepairResult<Dat
 
   for (const e of entities) {
     // Add a missing tenantId — normalize so tenant_id / tenantId / tenantID are equivalent.
-    const hasTenant = e.fields.some((f) => f.name.replace(/[_-]/g, "").toLowerCase() === "tenantid");
+    const hasTenant = e.fields.some((f) => isTenantField(f.name));
     if (!hasTenant) {
       e.fields.push(tenantField());
       log.push({

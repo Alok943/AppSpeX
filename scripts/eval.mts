@@ -176,6 +176,7 @@ async function runPrompt(p: typeof PROMPTS[number]): Promise<EvalEntry> {
     endpointCount: st.appSpec?.apiEndpoints?.length ?? 0,
     stages,
     errors: (st.errors ?? []).map((e: {code:string;message:string}) => ({ code: e.code, message: e.message.slice(0, 200) })),
+    coverage: st.coverageSummary ?? null,
   };
 
   const icon = entry.success ? "✓" : entry.clarificationRequired ? "?" : "✗";

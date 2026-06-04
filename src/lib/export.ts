@@ -26,7 +26,7 @@ function sanitiseFilename(prompt: string): string {
     .toLowerCase();
 }
 
-// ── Coverage computation (shared between UI & export) ────────────────────────
+import { computeCoverage, type CoverageItem } from "./coverage";
 
 const HEALTHY_REPAIRS = [
   "added tenantId",
@@ -42,81 +42,7 @@ const CONCERNING_REPAIRS = [
   "generated fallback",
 ];
 
-interface CoverageItem {
-  name: string;
-  covered: boolean;
-}
-
-interface CoverageSummary {
-  entities: CoverageItem[];
-  integrations: CoverageItem[];
-  businessRules: CoverageItem[];
-  features: CoverageItem[];
-  overallPercent: number;
-}
-
-function computeCoverage(
-  intent: AppIntent,
-  appSpec: AppSpec,
-  dataSchema: DataSchema,
-): CoverageSummary {
-  const schemaEntityNames = new Set(dataSchema.entities.map((e) => e.name.toLowerCase()));
-  const entities = intent.entities.map((e) => ({
-    name: e,
-    covered: schemaEntityNames.has(e.toLowerCase()),
-  }));
-
-  const allHooks = new Set([
-    ...appSpec.integrationHooks.map((h) => h.integration),
-    ...appSpec.workflowStubs.map((w) => w.integration),
-  ]);
-  const integrations = intent.integrations_requested.map((i) => ({
-    name: i,
-    covered: allHooks.has(i),
-  }));
-
-  const workflowText = appSpec.workflowStubs
-    .map((w) => `${w.trigger.condition || ""} ${w.name}`)
-    .join(" ")
-    .toLowerCase();
-  const businessRules = (intent.businessRules || []).map((r) => ({
-    name: r,
-    covered:
-      workflowText.includes(r.toLowerCase()) ||
-      r
-        .toLowerCase()
-        .split(/\s+/)
-        .some((word) => word.length > 4 && workflowText.includes(word)),
-  }));
-
-  const appSpecText = [
-    ...appSpec.pages.map((p) => p.name),
-    ...dataSchema.entities.map((e) => e.name),
-    ...dataSchema.entities.flatMap((e) => e.fields.map((f) => f.name)),
-    ...appSpec.workflowStubs.map((w) => w.name),
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  const features = intent.features.map((f) => {
-    const fLower = f.toLowerCase();
-    const isCovered =
-      appSpecText.includes(fLower) ||
-      fLower.split(/\s+/).some((word) => word.length > 4 && appSpecText.includes(word));
-    return { name: f, covered: isCovered };
-  });
-
-  const totalItems =
-    entities.length + integrations.length + businessRules.length + features.length;
-  const coveredItems =
-    entities.filter((x) => x.covered).length +
-    integrations.filter((x) => x.covered).length +
-    businessRules.filter((x) => x.covered).length +
-    features.filter((x) => x.covered).length;
-  const overallPercent = totalItems > 0 ? Math.round((coveredItems / totalItems) * 100) : 100;
-
-  return { entities, integrations, businessRules, features, overallPercent };
-}
+// ── Coverage computation (shared between UI & export) ────────────────────────
 
 interface HealthSummary {
   healthy: string[];
@@ -156,10 +82,30 @@ export function downloadJSON(status: JobStatusResponse) {
     appType: status.intent?.appType ?? null,
     coverageSummary: coverage
       ? {
-          entities: `${coverage.entities.filter((x) => x.covered).length}/${coverage.entities.length}`,
-          features: `${coverage.features.filter((x) => x.covered).length}/${coverage.features.length}`,
-          integrations: `${coverage.integrations.filter((x) => x.covered).length}/${coverage.integrations.length}`,
-          businessRules: `${coverage.businessRules.filter((x) => x.covered).length}/${coverage.businessRules.length}`,
+          entities: {
+            ok: coverage.entities.filter((x) => x.status === "ok").length,
+            partial: coverage.entities.filter((x) => x.status === "partial").length,
+            missing: coverage.entities.filter((x) => x.status === "missing").length,
+            total: coverage.entities.length
+          },
+          features: {
+            ok: coverage.features.filter((x) => x.status === "ok").length,
+            partial: coverage.features.filter((x) => x.status === "partial").length,
+            missing: coverage.features.filter((x) => x.status === "missing").length,
+            total: coverage.features.length
+          },
+          integrations: {
+            ok: coverage.integrations.filter((x) => x.status === "ok").length,
+            partial: coverage.integrations.filter((x) => x.status === "partial").length,
+            missing: coverage.integrations.filter((x) => x.status === "missing").length,
+            total: coverage.integrations.length
+          },
+          businessRules: {
+            ok: coverage.businessRules.filter((x) => x.status === "ok").length,
+            partial: coverage.businessRules.filter((x) => x.status === "partial").length,
+            missing: coverage.businessRules.filter((x) => x.status === "missing").length,
+            total: coverage.businessRules.length
+          },
           overallCoverage: `${coverage.overallPercent}%`,
         }
       : null,
@@ -261,7 +207,7 @@ function coverageList(doc: jsPDF, y: number, label: string, items: CoverageItem[
   y = bullet(
     doc,
     y,
-    items.map((x) => `${x.covered ? "[OK]" : "[MISSING]"} ${x.name}`),
+    items.map((x) => `[${x.status.toUpperCase()}] ${x.name}`),
   );
   return y;
 }
@@ -300,22 +246,22 @@ export function downloadPDF(status: JobStatusResponse) {
       ["Overall Coverage", `${coverage.overallPercent}%`],
       [
         "Entities",
-        `${coverage.entities.filter((x) => x.covered).length}/${coverage.entities.length}`,
+        `${coverage.entities.filter((x) => x.status === "ok").length}/${coverage.entities.length}`,
       ],
       [
         "Features",
-        `${coverage.features.filter((x) => x.covered).length}/${coverage.features.length}`,
+        `${coverage.features.filter((x) => x.status === "ok").length}/${coverage.features.length}`,
       ],
       [
         "Integrations",
-        `${coverage.integrations.filter((x) => x.covered).length}/${coverage.integrations.length}`,
+        `${coverage.integrations.filter((x) => x.status === "ok").length}/${coverage.integrations.length}`,
       ],
     ]);
     if (coverage.businessRules.length > 0) {
       y = keyValue(doc, y, [
         [
           "Business Rules",
-          `${coverage.businessRules.filter((x) => x.covered).length}/${coverage.businessRules.length}`,
+          `${coverage.businessRules.filter((x) => x.status === "ok").length}/${coverage.businessRules.length}`,
         ],
       ]);
     }

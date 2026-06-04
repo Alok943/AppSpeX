@@ -55,6 +55,22 @@ describe("validateDataSchema", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("passes a schema where tenant field is named tenant_id", () => {
+    const schemaWithTenantId: DataSchema = {
+      entities: [
+        {
+          name: "Deal",
+          description: "mock",
+          tableName: "deals",
+          fields: [{ ...tenantField, name: "tenant_id" }],
+          relations: [],
+        }
+      ]
+    };
+    const { result } = validateDataSchema(schemaWithTenantId);
+    expect(result.valid).toBe(true);
+  });
+
   it("flags an entity missing tenantId", () => {
     const bad: DataSchema = {
       entities: [{ name: "Note", description: "mock", tableName: "notes", fields: [], relations: [] }],

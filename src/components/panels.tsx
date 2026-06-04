@@ -133,6 +133,14 @@ export function PromptUnderstandingPanel({ intent }: { intent: AppIntent | null 
 
 // --- Coverage ---------------------------------------------------------------
 
+import { computeCoverage, type CoverageStatus } from "@/lib/coverage";
+
+const STATUS_UI: Record<CoverageStatus, { icon: string; color: string }> = {
+  ok: { icon: "✓", color: "text-emerald-400" },
+  partial: { icon: "◐", color: "text-amber-400" },
+  missing: { icon: "✗", color: "text-rose-400" },
+};
+
 export function RequirementCoveragePanel({
   intent,
   appSpec,
@@ -144,67 +152,17 @@ export function RequirementCoveragePanel({
 }) {
   if (!intent || !appSpec || !dataSchema) return null;
 
-  const schemaEntityNames = new Set(dataSchema.entities.map((e) => e.name.toLowerCase()));
-  const entityCoverage = intent.entities.map((e) => ({
-    name: e,
-    covered: schemaEntityNames.has(e.toLowerCase()),
-  }));
-
-  const allHooks = new Set([
-    ...appSpec.integrationHooks.map((h) => h.integration),
-    ...appSpec.workflowStubs.map((w) => w.integration),
-  ]);
-  const integrationCoverage = intent.integrations_requested.map((i) => ({
-    name: i,
-    covered: allHooks.has(i),
-  }));
-
-  const workflowText = appSpec.workflowStubs
-    .map((w) => `${w.trigger.condition || ""} ${w.name}`)
-    .join(" ")
-    .toLowerCase();
-  const businessRuleCoverage = (intent.businessRules || []).map((r) => ({
-    name: r,
-    covered: workflowText.includes(r.toLowerCase()) || r.toLowerCase().split(/\s+/).some(word => word.length > 4 && workflowText.includes(word)),
-  }));
-
-  // Feature coverage checks entities, fields, pages, and workflows.
-  const appSpecText = [
-    ...appSpec.pages.map((p) => p.name),
-    ...dataSchema.entities.map((e) => e.name),
-    ...dataSchema.entities.flatMap((e) => e.fields.map((f) => f.name)),
-    ...appSpec.workflowStubs.map((w) => w.name),
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  const featureCoverage = intent.features.map((f) => {
-    const fLower = f.toLowerCase();
-    const isCovered = appSpecText.includes(fLower) || fLower.split(/\s+/).some((word) => word.length > 4 && appSpecText.includes(word));
-    return { name: f, covered: isCovered };
-  });
-
-  const totalItems =
-    entityCoverage.length +
-    integrationCoverage.length +
-    businessRuleCoverage.length +
-    featureCoverage.length;
-  const coveredItems =
-    entityCoverage.filter((x) => x.covered).length +
-    integrationCoverage.filter((x) => x.covered).length +
-    businessRuleCoverage.filter((x) => x.covered).length +
-    featureCoverage.filter((x) => x.covered).length;
-  const overallCoverage = totalItems > 0 ? Math.round((coveredItems / totalItems) * 100) : 100;
+  const coverage = computeCoverage(intent, appSpec, dataSchema);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-8">
-        <Metric label="Overall Coverage" value={`${overallCoverage}%`} />
-        <Metric label="Features" value={`${featureCoverage.filter((x) => x.covered).length}/${featureCoverage.length}`} />
-        <Metric label="Entities" value={`${entityCoverage.filter((x) => x.covered).length}/${entityCoverage.length}`} />
-        <Metric label="Integrations" value={`${integrationCoverage.filter((x) => x.covered).length}/${integrationCoverage.length}`} />
-        {businessRuleCoverage.length > 0 && (
-          <Metric label="Business Rules" value={`${businessRuleCoverage.filter((x) => x.covered).length}/${businessRuleCoverage.length}`} />
+        <Metric label="Overall Coverage" value={`${coverage.overallPercent}%`} />
+        <Metric label="Features" value={`${coverage.features.filter((x) => x.status === "ok").length}/${coverage.features.length}`} />
+        <Metric label="Entities" value={`${coverage.entities.filter((x) => x.status === "ok").length}/${coverage.entities.length}`} />
+        <Metric label="Integrations" value={`${coverage.integrations.filter((x) => x.status === "ok").length}/${coverage.integrations.length}`} />
+        {coverage.businessRules.length > 0 && (
+          <Metric label="Business Rules" value={`${coverage.businessRules.filter((x) => x.status === "ok").length}/${coverage.businessRules.length}`} />
         )}
       </div>
 
@@ -212,10 +170,10 @@ export function RequirementCoveragePanel({
         <div>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Features</h3>
           <ul className="space-y-1">
-            {featureCoverage.map((x, i) => (
+            {coverage.features.map((x, i) => (
               <li key={i} className="flex gap-2 text-sm text-slate-300">
-                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
-                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+                <span className={STATUS_UI[x.status].color}>{STATUS_UI[x.status].icon}</span>
+                <span className={x.status === "missing" ? "opacity-60" : ""}>{x.name}</span>
               </li>
             ))}
           </ul>
@@ -223,10 +181,10 @@ export function RequirementCoveragePanel({
         <div>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Entities</h3>
           <ul className="space-y-1">
-            {entityCoverage.map((x, i) => (
+            {coverage.entities.map((x, i) => (
               <li key={i} className="flex gap-2 text-sm text-slate-300">
-                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
-                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+                <span className={STATUS_UI[x.status].color}>{STATUS_UI[x.status].icon}</span>
+                <span className={x.status === "missing" ? "opacity-60" : ""}>{x.name}</span>
               </li>
             ))}
           </ul>
@@ -234,23 +192,23 @@ export function RequirementCoveragePanel({
         <div>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Integrations</h3>
           <ul className="space-y-1">
-            {integrationCoverage.map((x, i) => (
+            {coverage.integrations.map((x, i) => (
               <li key={i} className="flex gap-2 text-sm text-slate-300">
-                <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
-                <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+                <span className={STATUS_UI[x.status].color}>{STATUS_UI[x.status].icon}</span>
+                <span className={x.status === "missing" ? "opacity-60" : ""}>{x.name}</span>
               </li>
             ))}
-            {integrationCoverage.length === 0 && <li className="text-sm text-slate-500">None requested</li>}
+            {coverage.integrations.length === 0 && <li className="text-sm text-slate-500">None requested</li>}
           </ul>
         </div>
-        {businessRuleCoverage.length > 0 && (
+        {coverage.businessRules.length > 0 && (
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Business Rules</h3>
             <ul className="space-y-1">
-              {businessRuleCoverage.map((x, i) => (
+              {coverage.businessRules.map((x, i) => (
                 <li key={i} className="flex gap-2 text-sm text-slate-300">
-                  <span className={x.covered ? "text-emerald-400" : "text-amber-400"}>{x.covered ? "✓" : "⚠"}</span>
-                  <span className={!x.covered ? "opacity-60" : ""}>{x.name}</span>
+                  <span className={STATUS_UI[x.status].color}>{STATUS_UI[x.status].icon}</span>
+                  <span className={x.status === "missing" ? "opacity-60" : ""}>{x.name}</span>
                 </li>
               ))}
             </ul>

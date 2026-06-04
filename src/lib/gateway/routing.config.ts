@@ -21,8 +21,8 @@ export interface RouteConfig {
  * (universal fallback) before dropping to the stage's `fallback` model.
  */
 export const ROUTING: Record<StageName, RouteConfig> = {
-  intent: { primary: "groq-llama-8b", fallback: "gemini-flash" },
-  schema: { primary: "groq-gpt-oss-120b", fallback: "gemini-flash" },
-  appspec: { primary: "groq-gpt-oss-120b", fallback: "gemini-flash" },
-  repair: { primary: "groq-llama-8b", fallback: "gemini-flash" },
+  intent: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
+  schema: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
+  appspec: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
+  repair: { primary: "gemini-flash-lite", fallback: "gemini-flash" },
 };

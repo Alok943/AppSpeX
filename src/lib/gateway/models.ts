@@ -61,6 +61,11 @@ export const MODELS: Record<string, ModelDef> = {
     providerModel: "gemini-2.5-flash",
     openRouterModel: "google/gemma-4-31b-it:free",
   },
+  "gemini-flash-lite": {
+    provider: "gemini",
+    providerModel: "gemini-3.1-flash-lite",
+    openRouterModel: "google/gemma-4-31b-it:free",
+  },
   // Available but not in the default routing.
   "groq-llama-70b": {
     provider: "groq",
@@ -87,6 +92,7 @@ export const COST_TABLE: Record<string, CostRate> = {
   "llama-3.3-70b-versatile": { inputPer1M: 0.59, outputPer1M: 0.79 },
   // Gemini — free tier for this key.
   "gemini-2.5-flash": { inputPer1M: 0, outputPer1M: 0 },
+  "gemini-3.1-flash-lite": { inputPer1M: 0, outputPer1M: 0 },
   // OpenRouter ":free" variants.
   "nvidia/nemotron-nano-9b-v2:free": { inputPer1M: 0, outputPer1M: 0 },
   "nvidia/nemotron-3-super-120b-a12b:free": { inputPer1M: 0, outputPer1M: 0 },

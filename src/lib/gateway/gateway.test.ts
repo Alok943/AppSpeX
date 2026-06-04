@@ -44,7 +44,7 @@ describe("Gateway", () => {
     const r = await gw.generate("intent", req);
 
     expect(r.text).toBe("hello");
-    expect(r.provider).toBe("groq");
+    expect(r.provider).toBe("gemini");
     expect(r.viaFallback).toBe(false);
     expect(r.tokensIn).toBe(10);
     expect(r.tokensOut).toBe(20);
